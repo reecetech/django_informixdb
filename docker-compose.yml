@@ -1,0 +1,18 @@
+version: '3'
+
+services:
+    db:
+        image: ibmcom/informix-developer-database
+        tty: true # Needed to ensure container doesn't self terminate
+        environment:
+            LICENSE: accept
+            DB_USER: adapter
+            DB_NAME: adapter
+            DB_PASS: adapter
+        privileged: true
+        ports:
+            - "9088:9088"
+            - "9089:9089"
+            - "27017:27017"
+            - "27018:27018"
+            - "27883:27883"
