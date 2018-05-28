@@ -15,7 +15,7 @@ setup(
     long_description=long_description,
     url='https://github.com/reecetech/django_informixdb',
     author='Reecetech',
-    author_email='richard.jones@reece.com.au',
+    author_email='opensource@reecetech.com.au',
     license='APLv2',
     classifiers=[
         'Development Status :: 5 - Production/Stable',
