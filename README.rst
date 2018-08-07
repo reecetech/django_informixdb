@@ -67,6 +67,12 @@ Django’s settings.py require the following format to connect to an Informix da
 	}
     }
 
+CPTIMEOUT
+    This will set connection pooling timeout.
+    Possible values:
+        0 - Turn off connection pooling
+        nn - timeout set nn seconds
+
 ISOLATION_LEVEL
     This will set database isolation level at connection level
     Possible values:
@@ -76,7 +82,8 @@ ISOLATION_LEVEL
 
 LOCK_MODE_WAIT
     This will set database LOCK MODE WAIT at connection level
-    Application can use this property to override the default server process for accessing a locked row or table.
+    Application can use this property to override the default server
+    process for accessing a locked row or table.
     The default value is 0 (do not wait for the lock).
     Possible values:
         -1 - WAIT until the lock is released.

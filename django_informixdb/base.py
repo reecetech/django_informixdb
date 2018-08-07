@@ -245,7 +245,8 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         self.connection.add_output_converter(pyodbc.SQL_WLONGVARCHAR, self._output_converter)
 
         # This will set database LOCK MODE WAIT at connection level
-        # Application can use this property to override the default server process for accessing a locked row or table.
+        # Application can use this property to override the default server
+        # process for accessing a locked row or table.
         # The default value is 0 (do not wait for the lock).
         # Possible values:
         #    -1 - WAIT until the lock is released.
