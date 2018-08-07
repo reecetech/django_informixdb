@@ -253,13 +253,13 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         #    0 - DO NOT WAIT, end the operation, and return with error.
         #    nn - WAIT for nn seconds for the lock to be released.
         if 'LOCK_MODE_WAIT' in conn_params['OPTIONS']:
-            if conn_params['OPTIONS']['LOCK_MODE_WAIT']:
-                wait_parameter = conn_params['OPTIONS']['LOCK_MODE_WAIT']
-                if wait_parameter == -1:
-                    wait_parameter = ''
-                sql = 'SET LOCK MODE TO WAIT ' + str(wait_parameter)
-            else:
+            wait_parameter = conn_params['OPTIONS']['LOCK_MODE_WAIT']
+            if wait_parameter == 0:
                 sql = 'SET LOCK MODE TO NOT WAIT'
+            elif wait_parameter == -1:
+                sql = 'SET LOCK MODE TO WAIT'
+            else:
+                sql = 'SET LOCK MODE TO WAIT {}'.format(wait_parameter)
             self.connection.cursor().execute(sql)
 
         return self.connection
