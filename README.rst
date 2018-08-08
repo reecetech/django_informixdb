@@ -207,4 +207,13 @@ You can follow the steps above, in the section on using Informix locally with Do
 
     ./manage.py test -k
 
+Release History
+---------------
 
+Version 1.1.0
+
+- Added LOCK_MODE_WAIT option
+
+Version 1.0.0
+
+- Initial public release
