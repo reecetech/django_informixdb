@@ -57,6 +57,9 @@ Django’s settings.py require the following format to connect to an Informix da
         'PASSWORD': 'passw0rd',
         'OPTIONS': {
             'DRIVER': '/path/to/iclit09b.so'. # Or iclit09b.dylib on macOS
+            'CPTIMEOUT': 120,
+            'ISOLATION_LEVEL': 'READ_UNCOMMITTED',
+            'LOCK_MODE_WAIT': 0,
         },
 	'TEST': {
 	    'NAME': 'myproject',
@@ -64,6 +67,28 @@ Django’s settings.py require the following format to connect to an Informix da
 	}
     }
 
+CPTIMEOUT
+    This will set connection pooling timeout.
+    Possible values:
+        0 - Turn off connection pooling
+        nn - timeout set nn seconds
+
+ISOLATION_LEVEL
+    This will set database isolation level at connection level
+    Possible values:
+        READ_COMMITED
+        READ_UNCOMMITTED
+        SERIALIZABLE
+
+LOCK_MODE_WAIT
+    This will set database LOCK MODE WAIT at connection level
+    Application can use this property to override the default server
+    process for accessing a locked row or table.
+    The default value is 0 (do not wait for the lock).
+    Possible values:
+        -1 - WAIT until the lock is released.
+        0 - DO NOT WAIT, end the operation, and return with error.
+        nn - WAIT for nn seconds for the lock to be released.
 .. note:
     The ``DRIVER`` option is optional, default locations will be used per platform if it is not provided.
 
