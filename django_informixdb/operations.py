@@ -83,7 +83,8 @@ class DatabaseOperations(BaseDatabaseOperations):
         return converters
 
     def convert_decimalfield_value(self, value, expression, connection, context):
-        value = expression.output_field.format_number(value)
+        value = backend_utils.format_number(value, expression.output_field.max_digits,
+                                            expression.output_field.decimal_places)
         if value is not None:
             return decimal.Decimal(value)
 

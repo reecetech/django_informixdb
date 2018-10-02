@@ -207,8 +207,25 @@ You can follow the steps above, in the section on using Informix locally with Do
 
     ./manage.py test -k
 
+
+For django_informixdb Developers
+--------------------------------
+
+To run the django_informixdb test suite, you need to set the INFORMIXDIR environment variable, and the tests
+expect an Informix database at host "dev". Change that host in `test/testproject/settings.py` if you need to.
+Then run the test suite with:
+
+    tox
+
+This will run the tests under Django 1 and 2.
+
+
 Release History
 ---------------
+
+Version 1.2.0
+
+- Fix bug in DecimalField handling under Django 2+
 
 Version 1.1.0
 

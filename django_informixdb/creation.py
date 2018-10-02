@@ -26,5 +26,5 @@ class DatabaseCreation(BaseDatabaseCreation):
         if self.connection.settings_dict.get('TEST', {}).get('CREATE_DB', True):
             try:
                 super()._destroy_test_db(test_database_name, verbosity)
-            except Error:
-                print("Unable to destroy test database")
+            except Error as e:
+                print(f"Unable to destroy test database: {e.args[1]}")
