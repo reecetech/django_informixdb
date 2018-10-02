@@ -1,11 +1,15 @@
 Django InformixDB
 ==================
 
-A database driver for Django to connect to an Informix database via
-informixdb python module.
+A database driver for Django to connect to an Informix database via pyodbc.
 
 **Some limitations**:
-- Do not support default values
+
+- Does not support default values
+- Informix automatically creates indexes on foreign keys, but Django attempts to do that
+  manually; the current implementation here just attempts to catch the error on index
+  creation. It may unintentionally catch other index creation errors where the index
+  already exists.
 
 
 Configure local environment
@@ -23,21 +27,21 @@ INFORMIXSQLHOSTS
     The path to the ``sqlhosts`` file that the Informix driver should use
 
 LD_LIBRARY_PATH
-    The path(s) to the various Informix library files: Usually $INFORIMIXDIR/lib:$INFORMIXDIR/lib/cli:$IMFORMIXDIR/lib/esql
+    The path(s) to the various Informix library files: Usually
+    ``$INFORIMIXDIR/lib:$INFORMIXDIR/lib/cli:$IMFORMIXDIR/lib/esql``
 
 
-You will also need to add an entry within your ``sqlhosts`` file for each remote/local Informix server connection in the following format:
-
-.. code-block:: bash
+You will also need to add an entry within your ``sqlhosts`` file for each remote/local Informix
+server connection in the following format::
 
     <INFORMIX_SERVER_NAME>    onsoctcp     <INFORMIX_HOST_NAME>    <INFORMIX_SERVICE_NAME>
-    # e.g.
-    dev    onsoctcp    localhost    sqlexec
 
+For example::
 
-Finally, you need to ensure that the service name is in the ``/etc/services`` file:
+    dev    onsoctcp    localhost    9088
 
-.. code-block:: bash
+You may alternatively use a symbolic name in that line in place of the port number, typically ``sqlexec`` and
+then configure the port number in the ``/etc/services`` file::
 
     sqlexec    9088/tcp
 
@@ -45,7 +49,7 @@ Finally, you need to ensure that the service name is in the ``/etc/services`` fi
 Configure settings.py
 ---------------------
 
-Django’s settings.py require the following format to connect to an Informix database:
+Django’s settings.py uses the following to connect to an Informix database:
 
 .. code-block:: python
 
@@ -61,10 +65,10 @@ Django’s settings.py require the following format to connect to an Informix da
             'ISOLATION_LEVEL': 'READ_UNCOMMITTED',
             'LOCK_MODE_WAIT': 0,
         },
-	'TEST': {
-	    'NAME': 'myproject',
-	    'CREATE_DB': False
-	}
+        'TEST': {
+            'NAME': 'myproject',
+            'CREATE_DB': False
+        }
     }
 
 CPTIMEOUT
@@ -89,6 +93,7 @@ LOCK_MODE_WAIT
         -1 - WAIT until the lock is released.
         0 - DO NOT WAIT, end the operation, and return with error.
         nn - WAIT for nn seconds for the lock to be released.
+
 .. note:
     The ``DRIVER`` option is optional, default locations will be used per platform if it is not provided.
 
@@ -115,19 +120,22 @@ You can stop and restart the container with:
 
 .. code-block:: bash
 
-    docker stop iif_developer_edition
-    docker start iif_developer_edition
+    $ docker stop iif_developer_edition
+    $ docker start iif_developer_edition
 
-It seems that the Informix ODBC driver does not currently support creating databases. So we will need to do that manually, by attaching to the running container
+It seems that the Informix ODBC driver does not currently support creating databases. So we will need to do
+that manually, by attaching to the running container
 
 .. code-block:: bash
 
-    docker attach iif_developer_edition
+    $ docker attach iif_developer_edition
 
 
-This will give you a shell on the running container, and you can therefore use dbaccess to create your database. You can exit this shell using ``Ctrl-p`` ``Ctrl-q`` without shutting down the whole container.
+This will give you a shell on the running container, and you can therefore use dbaccess to create your database.
+You can exit this shell using ``Ctrl-p`` ``Ctrl-q`` without shutting down the whole container.
 
-This Django database adaptor for Informix requires transaction support to be enabled in our database. This is not the default within the Informix Developer image.  So you need to enable it on a per database basis:
+This Django database adaptor for Informix requires transaction support to be enabled in our database.
+This is not the default within the Informix Developer image.  So you need to enable it on a per database basis:
 
 .. code-block:: bash
 
@@ -140,13 +148,7 @@ Finally you need to ensure that our local dev database is included in the ``sqlh
 
 .. code-block:: bash
 
-    dev    onsoctcp    localhost    sqlexec
-
-and also in ``/etc/services``:
-
-.. code-block:: bash
-
-    sqlexec    9088/tcp
+    dev    onsoctcp    localhost    9088
 
 You should now be able to point Django to our local test database using the syntax detailed above.
 
