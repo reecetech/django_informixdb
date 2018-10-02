@@ -27,7 +27,7 @@ class DataTypesTestCase(TestCase):
         d2 = Donut.objects.get(name='Apple Fritter')
         self.assertEqual(d2.cost, Decimal(1))
 
-    def test_decimal(self):
+    def test_decimal_precision(self):
         d = Donut(name='Apple Fritter', cost=1.23)
         self.assertEqual(d.cost, 1.23)
         d.save()
