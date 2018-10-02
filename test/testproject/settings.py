@@ -37,6 +37,9 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    # all test apps
+    'datatypes',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -77,13 +80,10 @@ WSGI_APPLICATION = 'testproject.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django_informixdb',
-        'NAME': 'adapter',
         'SERVER': 'dev',
-        'USER': 'adapter',
-        'PASSWORD': 'adapter',
-        'OPTIONS': {
-            'DRIVER': '/Applications/IBM/informix/lib/cli/iclit09b.dylib'
-        }
+        'NAME': 'adapter',
+        'USER': 'informix',
+        'PASSWORD': 'in4mix',
     }
 }
 

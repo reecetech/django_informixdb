@@ -19,14 +19,14 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
 
     def execute(self, sql, params=[]):
         """
-        Informix adds and index to foreign keys automatically
+        Informix adds an index to foreign keys automatically
 
-        This silence the error when Django tries to do the same thing independantly
+        This silences the error when Django tries to do the same thing independently
         """
         try:
             super(DatabaseSchemaEditor, self).execute(sql, params)
         except (ProgrammingError, DatabaseError) as e:
-            if "CREATE INDEX" not in sql and 'Index already exists' not in str(e):
+            if "CREATE INDEX" not in str(sql) and 'Index already exists' not in str(e):
                 # ugh, that feels dirty
                 raise e
 
