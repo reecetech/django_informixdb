@@ -82,28 +82,28 @@ class DatabaseOperations(BaseDatabaseOperations):
             converters.append(self.convert_uuidfield_value)
         return converters
 
-    def convert_decimalfield_value(self, value, expression, connection, context):
+    def convert_decimalfield_value(self, value, expression, connection, context=None):
         value = backend_utils.format_number(value, expression.output_field.max_digits,
                                             expression.output_field.decimal_places)
         if value is not None:
             return decimal.Decimal(value)
 
-    def convert_datefield_value(self, value, expression, connection, context):
+    def convert_datefield_value(self, value, expression, connection, context=None):
         if value is not None and not isinstance(value, datetime.date):
             value = parse_date(value)
         return value
 
-    def convert_datetimefield_value(self, value, expression, connection, context):
+    def convert_datetimefield_value(self, value, expression, connection, context=None):
         if value is not None and not isinstance(value, datetime.datetime):
             value = parse_datetime(value)
         return value
 
-    def convert_timefield_value(self, value, expression, connection, context):
+    def convert_timefield_value(self, value, expression, connection, context=None):
         if value is not None and not isinstance(value, datetime.time):
             value = parse_time(value)
         return value
 
-    def convert_uuidfield_value(self, value, expression, connection, context):
+    def convert_uuidfield_value(self, value, expression, connection, context=None):
         if value is not None:
             value = uuid.UUID(value)
         return value

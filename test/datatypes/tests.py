@@ -2,6 +2,7 @@ from decimal import Decimal
 
 from django.test import TestCase
 
+from django_informixdb.fields import TrimCharField
 from .models import Donut
 
 
@@ -33,3 +34,17 @@ class DataTypesTestCase(TestCase):
         d.save()
         d2 = Donut.objects.get(name='Apple Fritter')
         self.assertEqual(d2.cost, Decimal('1.23'))
+
+    def test_characters(self):
+        d = Donut(name='Apple Fritter ')
+        self.assertEqual(d.name, 'Apple Fritter ')
+        d.save()
+        d2 = Donut.objects.get(name='Apple Fritter ')
+        self.assertEqual(d2.name, 'Apple Fritter ')
+
+    def test_trim_characters(self):
+        d = Donut(trim_name='abc ')
+        self.assertEqual(d.trim_name, 'abc ')
+        d.save()
+        d2 = Donut.objects.get(trim_name='abc')
+        self.assertEqual(d2.trim_name, 'abc')

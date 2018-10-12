@@ -228,6 +228,10 @@ This will run the tests under Django 1 and 2.
 Release History
 ---------------
 
+Version 1.3.0
+
+- Addressing deprecation warning for conversion functions in Django 2+
+
 Version 1.2.0
 
 - Fix bug in DecimalField handling under Django 2+
