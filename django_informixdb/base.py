@@ -187,6 +187,9 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         if 'DRIVER' not in options or options['DRIVER'] is None:
             options['DRIVER'] = self.get_driver_path()
         if platform.system().upper() != 'WINDOWS':
+            sqlhosts = os.environ.get('INFORMIXSQLHOSTS')
+            if not sqlhosts or not os.path.exists(sqlhosts):
+                raise ImproperlyConfigured('Cannot find Informix sqlhosts at {}'.format(sqlhosts))
             if not os.path.exists(options['DRIVER']):
                 raise ImproperlyConfigured('cannot find Informix driver at {}'.format(options['DRIVER']))
         conn_params['OPTIONS'] = options
