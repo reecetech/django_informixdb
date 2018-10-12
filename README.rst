@@ -231,6 +231,7 @@ Release History
 Version 1.3.0
 
 - Addressing deprecation warning for conversion functions in Django 2+
+- Detect incorrect INFORMIXSQLHOSTS setting earlier for better error message
 
 Version 1.2.0
 
