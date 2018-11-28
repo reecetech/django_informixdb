@@ -30,6 +30,9 @@ LD_LIBRARY_PATH
     The path(s) to the various Informix library files: Usually
     ``$INFORIMIXDIR/lib:$INFORMIXDIR/lib/cli:$IMFORMIXDIR/lib/esql``
 
+DB_LOCALE
+    In case of ``Database locale information mismatch.`` error during connection,
+    you should specify your database locale, e.g. ``DB_LOCALE=en_US.8859-15``
 
 You will also need to add an entry within your ``sqlhosts`` file for each remote/local Informix
 server connection in the following format::
