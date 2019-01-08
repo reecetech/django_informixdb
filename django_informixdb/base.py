@@ -60,7 +60,8 @@ class DatabaseWrapper(BaseDatabaseWrapper):
 
     ISOLATION_LEVEL = {
         'READ_COMMITED': pyodbc.SQL_TXN_READ_COMMITTED,
-        'READ_UNCOMMITTED' : pyodbc.SQL_TXN_READ_UNCOMMITTED,  # Dirty Read
+        'READ_UNCOMMITTED': pyodbc.SQL_TXN_READ_UNCOMMITTED,  # Dirty Read
+        'REPEATABLE_READ': pyodbc.SQL_TXN_REPEATABLE_READ,
         'SERIALIZABLE': pyodbc.SQL_TXN_SERIALIZABLE,
     }
 
@@ -247,23 +248,8 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         self.connection.add_output_converter(pyodbc.SQL_LONGVARCHAR, self._output_converter)
         self.connection.add_output_converter(pyodbc.SQL_WLONGVARCHAR, self._output_converter)
 
-        # This will set database LOCK MODE WAIT at connection level
-        # Application can use this property to override the default server
-        # process for accessing a locked row or table.
-        # The default value is 0 (do not wait for the lock).
-        # Possible values:
-        #    -1 - WAIT until the lock is released.
-        #    0 - DO NOT WAIT, end the operation, and return with error.
-        #    nn - WAIT for nn seconds for the lock to be released.
         if 'LOCK_MODE_WAIT' in conn_params['OPTIONS']:
-            wait_parameter = conn_params['OPTIONS']['LOCK_MODE_WAIT']
-            if wait_parameter == 0:
-                sql = 'SET LOCK MODE TO NOT WAIT'
-            elif wait_parameter == -1:
-                sql = 'SET LOCK MODE TO WAIT'
-            else:
-                sql = 'SET LOCK MODE TO WAIT {}'.format(wait_parameter)
-            self.connection.cursor().execute(sql)
+            self.set_lock_mode(wait=conn_params['OPTIONS']['LOCK_MODE_WAIT'])
 
         return self.connection
 
@@ -320,6 +306,32 @@ class DatabaseWrapper(BaseDatabaseWrapper):
 
     def read_committed(self):
         self.cursor().execute('set isolation to committed read;')
+
+    def read_repeatable(self):
+        self.cursor().execute('set isolation to repeatable read;')
+
+    def read_committed_with_update_locks(self):
+        self.cursor().execute('set isolation to committed read retain update locks;')
+
+    def set_lock_mode(self, wait=None):
+        """
+        This will set database LOCK MODE WAIT at connection level
+        Application can use this property to override the default server
+        process for accessing a locked row or table.
+        The default value is 0 (do not wait for the lock).
+        Possible values:
+           -1 - WAIT until the lock is released.
+           0 - DO NOT WAIT, end the operation, and return with error.
+           nn - WAIT for nn seconds for the lock to be released.
+        """
+        if wait == 0:
+            sql = 'SET LOCK MODE TO NOT WAIT'
+        elif wait == -1:
+            sql = 'SET LOCK MODE TO WAIT'
+        else:
+            sql = 'SET LOCK MODE TO WAIT {}'.format(wait)
+
+        self.cursor().execute(sql)
 
     def _commit(self):
         if self.connection is not None:

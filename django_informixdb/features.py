@@ -12,9 +12,11 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     can_rollback_ddl = True
     uses_savepoints = True
     can_release_savepoints = True
-    autocommits_when_autocommit_is_off = True
+    autocommits_when_autocommit_is_off = False
     supports_timezones = False
     supports_sequence_reset = False
     supports_tablespaces = True
     can_introspect_autofield = True
+    has_select_for_update = True
+    supports_select_for_update_with_limit = True
     closed_cursor_error_class = InterfaceError
