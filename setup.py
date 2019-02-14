@@ -29,7 +29,7 @@ setup(
     ],
     keywords='django informix',
     packages=find_packages(exclude=['contrib', 'docs', 'tests']),
-    install_requires=['django>=1.9.6', 'pyodbc==4.0.21'],
+    install_requires=['django>=1.9.6', 'pyodbc>=4.0.21'],
     extras_require={
         'dev': ['check-manifest'],
         'test': ['coverage'],
