@@ -17,12 +17,10 @@ class CharToBooleanField(models.CharField):
     """
     description = "CharField that hides the Y/N implementation and converts to Booleans"
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, null=True, **kwargs):
         kwargs['max_length'] = 1
-        if kwargs.get('null') is None:
-            kwargs['null'] = True
 
-        super().__init__(*args, **kwargs)
+        super().__init__(*args, null=null, **kwargs)
 
     def to_python(self, value):
         if self.null and value in self.empty_values:
