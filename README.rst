@@ -68,6 +68,13 @@ Django’s settings.py uses the following to connect to an Informix database:
             'ISOLATION_LEVEL': 'READ_UNCOMMITTED',
             'LOCK_MODE_WAIT': 0,
         },
+        'CONNECTION_RETRY': {
+            'MAX_ATTEMPTS': 3,
+            'WAIT_MIN': 25,
+            'WAIT_MAX': 1000,
+            'WAIT_MULTIPLIER': 25,
+            'WAIT_EXP_BASE': 2,
+        },
         'TEST': {
             'NAME': 'myproject',
             'CREATE_DB': False
@@ -99,6 +106,21 @@ LOCK_MODE_WAIT
         -1 - WAIT until the lock is released.
         0 - DO NOT WAIT, end the operation, and return with error.
         nn - WAIT for nn seconds for the lock to be released.
+
+CONNECTION_RETRY
+    When opening a new connection to the database, automatically retry up to
+    MAX_ATTEMPTS times in the case of errors. The wait time between retries is calculated using an
+    exponential backoff with jitter formula::
+
+        random_between(WAIT_MIN, min(WAIT_MAX, WAIT_MULTIPLIER * WAIT_EXP_BASE ** attempt))
+
+    Defaults (wait times are in milliseconds)::
+
+        MAX_ATTEMPTS: 1
+        WAIT_MIN: 0
+        WAIT_MAX: 1000
+        WAIT_MULTIPLIER: 25
+        WAIT_EXP_BASE: 2
 
 .. note:
     The ``DRIVER`` option is optional, default locations will be used per platform if it is not provided.
