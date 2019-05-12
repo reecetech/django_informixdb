@@ -224,7 +224,6 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         connection_string = ';'.join(parts)
         logging.debug('Connecting to Informix')
         self.connection = self._get_connection_with_retries(connection_string, conn_params)
-
         self.connection.setencoding(encoding='UTF-8')
 
         # This will set database isolation level at connection level
@@ -271,15 +270,15 @@ class DatabaseWrapper(BaseDatabaseWrapper):
             attempt += 1
             try:
                 conn = pyodbc.connect(connection_string, autocommit=conn_params["AUTOCOMMIT"])
-            except pyodbc.Error:
+            except pyodbc.Error as err:
                 if attempt < max_attempts:
                     wait = random.uniform(
                         wait_min,
                         max(wait_min, min(wait_max, multiplier * exp_base ** (attempt - 1))),
                     )
                     logger.info(
-                        f"failed to connect to db on attempt {attempt}; "
-                        f"waiting {wait} ms before trying again"
+                        f'failed to connect to db on attempt {attempt}: "{err}"; '
+                        f"waiting {wait:.1f} ms before trying again"
                     )
                     time.sleep(wait / 1000)
                     continue

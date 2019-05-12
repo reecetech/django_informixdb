@@ -253,6 +253,10 @@ This will run the tests under Django 1 and 2.
 Release History
 ---------------
 
+Version 1.5.0
+
+- Enable retrying if get connection fails.
+
 Version 1.3.3
 
 - Compability fix for Django 2+ to remove old "context" argument from
