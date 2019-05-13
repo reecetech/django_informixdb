@@ -9,6 +9,7 @@ import sys
 import platform
 import time
 import random
+import re
 
 from django.db.backends.base.base import BaseDatabaseWrapper
 from django.db.backends.base.validation import BaseDatabaseValidation
@@ -264,6 +265,8 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         wait_max = retry_params.get("WAIT_MAX", 1000)
         multiplier = retry_params.get("WAIT_MULTIPLIER", 25)
         exp_base = retry_params.get("WAIT_EXP_BASE", 2)
+        errors_to_retry = retry_params.get("ERRORS", ["-908", "-27001"])
+        retryable = re.compile(r"\((" + "|".join(errors_to_retry) + r")\)")
 
         attempt = 0
         while True:
@@ -271,7 +274,7 @@ class DatabaseWrapper(BaseDatabaseWrapper):
             try:
                 conn = pyodbc.connect(connection_string, autocommit=conn_params["AUTOCOMMIT"])
             except pyodbc.Error as err:
-                if attempt < max_attempts:
+                if attempt < max_attempts and retryable.search(err.args[1]):
                     wait = random.uniform(
                         wait_min,
                         max(wait_min, min(wait_max, multiplier * exp_base ** (attempt - 1))),

@@ -74,6 +74,7 @@ Django’s settings.py uses the following to connect to an Informix database:
             'WAIT_MAX': 1000,
             'WAIT_MULTIPLIER': 25,
             'WAIT_EXP_BASE': 2,
+            'ERRORS': ['-908', '-27017'],
         },
         'TEST': {
             'NAME': 'myproject',
@@ -108,9 +109,9 @@ LOCK_MODE_WAIT
         nn - WAIT for nn seconds for the lock to be released.
 
 CONNECTION_RETRY
-    When opening a new connection to the database, automatically retry up to
-    MAX_ATTEMPTS times in the case of errors. The wait time between retries is calculated using an
-    exponential backoff with jitter formula::
+    When opening a new connection to the database, automatically retry up to MAX_ATTEMPTS times in
+    the case of errors. Only error codes in ``ERRORS`` will trigger a retry. The wait time between
+    retries is calculated using an exponential backoff with jitter formula::
 
         random_between(WAIT_MIN, min(WAIT_MAX, WAIT_MULTIPLIER * WAIT_EXP_BASE ** attempt))
 
@@ -121,6 +122,7 @@ CONNECTION_RETRY
         WAIT_MAX: 1000
         WAIT_MULTIPLIER: 25
         WAIT_EXP_BASE: 2
+        ERRORS: ['-908', '-27017']
 
 .. note:
     The ``DRIVER`` option is optional, default locations will be used per platform if it is not provided.
