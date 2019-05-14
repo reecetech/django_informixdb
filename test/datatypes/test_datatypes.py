@@ -2,7 +2,6 @@ from decimal import Decimal
 
 from django.test import TestCase
 
-from django_informixdb.fields import TrimCharField
 from .models import Donut
 
 

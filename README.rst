@@ -68,6 +68,14 @@ Django’s settings.py uses the following to connect to an Informix database:
             'ISOLATION_LEVEL': 'READ_UNCOMMITTED',
             'LOCK_MODE_WAIT': 0,
         },
+        'CONNECTION_RETRY': {
+            'MAX_ATTEMPTS': 3,
+            'WAIT_MIN': 25,
+            'WAIT_MAX': 1000,
+            'WAIT_MULTIPLIER': 25,
+            'WAIT_EXP_BASE': 2,
+            'ERRORS': ['-908', '-27001'],
+        },
         'TEST': {
             'NAME': 'myproject',
             'CREATE_DB': False
@@ -99,6 +107,31 @@ LOCK_MODE_WAIT
         -1 - WAIT until the lock is released.
         0 - DO NOT WAIT, end the operation, and return with error.
         nn - WAIT for nn seconds for the lock to be released.
+
+CONNECTION_RETRY
+    When opening a new connection to the database, automatically retry up to MAX_ATTEMPTS times in
+    the case of errors. Only error codes in ``ERRORS`` will trigger a retry. The wait time between
+    retries is calculated using an exponential backoff with jitter formula::
+
+        random_between(WAIT_MIN, min(WAIT_MAX, WAIT_MULTIPLIER * WAIT_EXP_BASE ** (attempt - 1)))
+
+    Defaults (wait times are in milliseconds)::
+
+        MAX_ATTEMPTS: 1
+        WAIT_MIN: 0
+        WAIT_MAX: 1000
+        WAIT_MULTIPLIER: 25
+        WAIT_EXP_BASE: 2
+        ERRORS: ['-908', '-27001']
+
+    The error codes that are retried by default correspond to the following errors:
+
+    * ``-908 Attempt to connect to database server (servername) failed``
+    * ``-27001 Read error occurred during connection attempt``
+
+    These errors are often seen when the database server is too busy, too many clients are
+    attempting to connect at the same time or a network firewall has chopped the connection.
+
 
 .. note:
     The ``DRIVER`` option is optional, default locations will be used per platform if it is not provided.
@@ -230,6 +263,10 @@ This will run the tests under Django 1 and 2.
 
 Release History
 ---------------
+
+Version 1.5.0
+
+- Enable retrying if get connection fails.
 
 Version 1.3.3
 

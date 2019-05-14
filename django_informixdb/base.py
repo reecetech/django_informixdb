@@ -7,6 +7,9 @@ import logging
 import os
 import sys
 import platform
+import time
+import random
+import re
 
 from django.db.backends.base.base import BaseDatabaseWrapper
 from django.db.backends.base.validation import BaseDatabaseValidation
@@ -221,8 +224,7 @@ class DatabaseWrapper(BaseDatabaseWrapper):
 
         connection_string = ';'.join(parts)
         logging.debug('Connecting to Informix')
-        self.connection = pyodbc.connect(connection_string, autocommit=conn_params['AUTOCOMMIT'])
-
+        self.connection = self._get_connection_with_retries(connection_string, conn_params)
         self.connection.setencoding(encoding='UTF-8')
 
         # This will set database isolation level at connection level
@@ -252,6 +254,41 @@ class DatabaseWrapper(BaseDatabaseWrapper):
             self.set_lock_mode(wait=conn_params['OPTIONS']['LOCK_MODE_WAIT'])
 
         return self.connection
+
+    def _get_connection_with_retries(self, connection_string, conn_params):
+        """
+        Attempt to open a connection, retrying on failure with an exponential backoff.
+        """
+        retry_params = conn_params.get("CONNECTION_RETRY", {})
+        max_attempts = retry_params.get("MAX_ATTEMPTS", 1)
+        wait_min = retry_params.get("WAIT_MIN", 0)
+        wait_max = retry_params.get("WAIT_MAX", 1000)
+        multiplier = retry_params.get("WAIT_MULTIPLIER", 25)
+        exp_base = retry_params.get("WAIT_EXP_BASE", 2)
+        errors_to_retry = retry_params.get("ERRORS", ["-908", "-27001"])
+        retryable = re.compile(r"\((" + "|".join(errors_to_retry) + r")\)")
+
+        attempt = 0
+        while True:
+            attempt += 1
+            try:
+                conn = pyodbc.connect(connection_string, autocommit=conn_params["AUTOCOMMIT"])
+            except pyodbc.Error as err:
+                if attempt < max_attempts and retryable.search(err.args[1]):
+                    wait = random.uniform(
+                        wait_min,
+                        max(wait_min, min(wait_max, multiplier * exp_base ** (attempt - 1))),
+                    )
+                    logger.info(
+                        f'failed to connect to db on attempt {attempt}: "{err}"; '
+                        f"waiting {wait:.1f} ms before trying again"
+                    )
+                    time.sleep(wait / 1000)
+                    continue
+                else:
+                    raise
+            else:
+                return conn
 
     def _unescape(self, raw):
         """
