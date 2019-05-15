@@ -265,7 +265,7 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         wait_max = retry_params.get("WAIT_MAX", 1000)
         multiplier = retry_params.get("WAIT_MULTIPLIER", 25)
         exp_base = retry_params.get("WAIT_EXP_BASE", 2)
-        errors_to_retry = retry_params.get("ERRORS", ["-908", "-27001"])
+        errors_to_retry = retry_params.get("ERRORS", ["-908", "-930", "-27001"])
         retryable = re.compile(r"\((" + "|".join(errors_to_retry) + r")\)")
 
         attempt = 0
