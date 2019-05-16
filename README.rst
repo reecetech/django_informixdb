@@ -74,7 +74,7 @@ Django’s settings.py uses the following to connect to an Informix database:
             'WAIT_MAX': 1000,
             'WAIT_MULTIPLIER': 25,
             'WAIT_EXP_BASE': 2,
-            'ERRORS': ['-908', '-27001'],
+            'ERRORS': ['-908', '-930', '-27001'],
         },
         'TEST': {
             'NAME': 'myproject',
@@ -122,11 +122,12 @@ CONNECTION_RETRY
         WAIT_MAX: 1000
         WAIT_MULTIPLIER: 25
         WAIT_EXP_BASE: 2
-        ERRORS: ['-908', '-27001']
+        ERRORS: ['-908', '-930', '-27001']
 
     The error codes that are retried by default correspond to the following errors:
 
     * ``-908 Attempt to connect to database server (servername) failed``
+    * ``-930 Cannot connect to database server servername``
     * ``-27001 Read error occurred during connection attempt``
 
     These errors are often seen when the database server is too busy, too many clients are
