@@ -69,12 +69,7 @@ Django’s settings.py uses the following to connect to an Informix database:
             'LOCK_MODE_WAIT': 0,
         },
         'CONNECTION_RETRY': {
-            'MAX_ATTEMPTS': 3,
-            'WAIT_MIN': 25,
-            'WAIT_MAX': 1000,
-            'WAIT_MULTIPLIER': 25,
-            'WAIT_EXP_BASE': 2,
-            'ERRORS': ['-908', '-930', '-27001'],
+            'MAX_ATTEMPTS': 10,
         },
         'TEST': {
             'NAME': 'myproject',
@@ -109,20 +104,35 @@ LOCK_MODE_WAIT
         nn - WAIT for nn seconds for the lock to be released.
 
 CONNECTION_RETRY
-    When opening a new connection to the database, automatically retry up to MAX_ATTEMPTS times in
-    the case of errors. Only error codes in ``ERRORS`` will trigger a retry. The wait time between
-    retries is calculated using an exponential backoff with jitter formula::
+    When opening a new connection to the database, automatically retry up to ``MAX_ATTEMPTS`` times
+    in the case of errors. Only error codes in ``ERRORS`` will trigger a retry. The wait time
+    between retries is calculated using an exponential backoff with jitter formula::
 
         random_between(WAIT_MIN, min(WAIT_MAX, WAIT_MULTIPLIER * WAIT_EXP_BASE ** (attempt - 1)))
 
     Defaults (wait times are in milliseconds)::
 
-        MAX_ATTEMPTS: 1
+        MAX_ATTEMPTS: 1  # this implies no retries
         WAIT_MIN: 0
         WAIT_MAX: 1000
         WAIT_MULTIPLIER: 25
         WAIT_EXP_BASE: 2
         ERRORS: ['-908', '-930', '-27001']
+
+    Each of these settings can be overridden in the ``CONNECTION_RETRY`` section of the database
+    configuration in ``settings.py``. For example::
+
+        DATABASES = {
+           'default': {
+               'ENGINE': 'django_informixdb',
+               'CONNECTION_RETRY': {
+                   'MAX_ATTEMPTS': 10,
+                   'WAIT_MIN': 0,
+                   'WAIT_MAX': 500,
+               },
+               # ...
+            },
+         }
 
     The error codes that are retried by default correspond to the following errors:
 
