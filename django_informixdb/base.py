@@ -243,6 +243,10 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         self.connection.add_output_converter(-101, lambda r: r.decode('utf-8'))  # Constraints
         self.connection.add_output_converter(-391, lambda r: r.decode('utf-16-be'))  # Integrity Error
 
+        # column names need to be manually decoded, per
+        # https://github.com/mkleehammer/pyodbc/issues/194#issuecomment-280474992
+        self.connection.setdecoding(pyodbc.SQL_WMETADATA, encoding='utf-32le')
+
         self.connection.add_output_converter(pyodbc.SQL_CHAR, self._output_converter)
         self.connection.add_output_converter(pyodbc.SQL_WCHAR, self._output_converter)
         self.connection.add_output_converter(pyodbc.SQL_VARCHAR, self._output_converter)
