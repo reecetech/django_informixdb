@@ -21,7 +21,8 @@ AUTHENTICATION_ERROR = pyodbc.Error(
 def test_DatabaseWrapper_get_new_connection_calls_pyodbc_connect(mocker):
     mock_connect = mocker.patch("pyodbc.connect", autospec=True)
     db = DatabaseWrapper({
-        "SERVER": "server1", "NAME": "db1", "USER": "user1", "PASSWORD": "password1"
+        "SERVER": "server1", "NAME": "db1", "USER": "user1", "PASSWORD": "password1",
+        "OPTIONS": {"CONN_TIMEOUT": 120}
     })
     db.get_new_connection(db.get_connection_params())
     assert mock_connect.called is True
@@ -31,6 +32,7 @@ def test_DatabaseWrapper_get_new_connection_calls_pyodbc_connect(mocker):
     assert "Database=db1" in parts
     assert "Uid=user1" in parts
     assert "Pwd=password1" in parts
+    assert mock_connect.call_args[1]['timeout'] == 120
 
 
 def test_get_new_connection_doesnt_retry_by_default(mocker):

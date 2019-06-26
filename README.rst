@@ -65,6 +65,7 @@ Django’s settings.py uses the following to connect to an Informix database:
         'OPTIONS': {
             'DRIVER': '/path/to/iclit09b.so'. # Or iclit09b.dylib on macOS
             'CPTIMEOUT': 120,
+            'CONN_TIMEOUT': 120,
             'ISOLATION_LEVEL': 'READ_UNCOMMITTED',
             'LOCK_MODE_WAIT': 0,
         },
@@ -82,6 +83,13 @@ CPTIMEOUT
     Possible values::
 
         0 - Turn off connection pooling
+        nn - timeout set nn seconds
+
+CONN_TIMEOUT
+    This will set timeout for operations on connections (connection, ??closing??, we're not sure).
+    Possible values::
+
+        0 - Default timeout to the database (which could mean no timeout)
         nn - timeout set nn seconds
 
 ISOLATION_LEVEL
@@ -274,6 +282,10 @@ This will run the tests under Django 1 and 2.
 
 Release History
 ---------------
+
+Version 1.7.0
+
+- Add CONN_TIMEOUT setting.
 
 Version 1.5.0
 
