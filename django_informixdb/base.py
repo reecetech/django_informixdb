@@ -273,7 +273,7 @@ class DatabaseWrapper(BaseDatabaseWrapper):
             attempt += 1
             try:
                 conn = pyodbc.connect(connection_string, autocommit=conn_params["AUTOCOMMIT"],
-                                      timeout=conn_params.get("CONN_TIMEOUT", 0))
+                                      timeout=conn_params["OPTIONS"].get("CONN_TIMEOUT", 0))
             except pyodbc.Error as err:
                 if attempt < max_attempts and retryable.search(err.args[1]):
                     wait = random.uniform(
