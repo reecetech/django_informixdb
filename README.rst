@@ -292,6 +292,10 @@ This will run the tests under Django 1 and 2.
 Release History
 ---------------
 
+Version 1.8.0
+
+- Enable validating connections at start of request.
+
 Version 1.7.0
 
 - Add CONN_TIMEOUT setting.
