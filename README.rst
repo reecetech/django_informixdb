@@ -68,6 +68,7 @@ Django’s settings.py uses the following to connect to an Informix database:
             'CONN_TIMEOUT': 120,
             'ISOLATION_LEVEL': 'READ_UNCOMMITTED',
             'LOCK_MODE_WAIT': 0,
+            'VALIDATE_CONNECTION': True,
         },
         'CONNECTION_RETRY': {
             'MAX_ATTEMPTS': 10,
@@ -110,6 +111,14 @@ LOCK_MODE_WAIT
         -1 - WAIT until the lock is released.
         0 - DO NOT WAIT, end the operation, and return with error.
         nn - WAIT for nn seconds for the lock to be released.
+
+VALIDATE_CONNECTION
+    Whether existing connections should be validated at the start of the request. Defaults to
+    `False`.
+
+VALIDATION_QUERY
+    Query used to validate whether a connection is usable. Defaults to
+    `"SELECT 1 FROM sysmaster:sysdual"`.
 
 CONNECTION_RETRY
     When opening a new connection to the database, automatically retry up to ``MAX_ATTEMPTS`` times

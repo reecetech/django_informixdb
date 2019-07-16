@@ -3,17 +3,17 @@ from django.conf import settings
 
 def pytest_configure():
     settings.configure(
-        ROOT_URLCONF="tests.urls",
+        ROOT_URLCONF="test.urls",
         MIDDLEWARE=(),
         INSTALLED_APPS=(
             "django.contrib.auth",
             "django.contrib.contenttypes",
-            "datatypes",
+            "test.datatypes",
         ),
         DATABASES={
             "default": {
                 "ENGINE": "django_informixdb",
-                "SERVER": "dev",
+                "SERVER": "informix",
                 "NAME": "adapter",
                 "USER": "informix",
                 "PASSWORD": "in4mix",

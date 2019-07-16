@@ -18,6 +18,92 @@ AUTHENTICATION_ERROR = pyodbc.Error(
 )
 
 
+@pytest.fixture
+def mock_autocommit_methods(mocker):
+    mocker.patch.object(DatabaseWrapper, "get_autocommit", return_value=True, autospec=True)
+    mocker.patch.object(DatabaseWrapper, "set_autocommit", autospec=True)
+
+
+@pytest.fixture
+def mock_is_usable(mocker):
+    yield mocker.patch.object(DatabaseWrapper, "is_usable", return_value=False, autospec=True)
+
+
+def test_DatabaseWrapper_get_new_connection_successfully_connects(mock_autocommit_methods):
+    db = DatabaseWrapper({
+        "ENGINE": "django_informixdb",
+        "SERVER": "informix",
+        "NAME": "sysmaster",
+        "USER": "informix",
+        "PASSWORD": "in4mix",
+        "OPTIONS": {},
+        "AUTOCOMMIT": True,
+        "CONN_MAX_AGE": None,
+        "TIME_ZONE": None,
+    })
+    assert db.connection is None
+    db.connect()
+    assert db.connection is not None
+    assert db.is_usable() is True
+
+
+def test_DatabaseWrapper_validate_connection_closes_connections_that_are_not_usable(
+    mock_autocommit_methods, mock_is_usable
+):
+    mock_is_usable.return_value = False
+    db = DatabaseWrapper({
+        "ENGINE": "django_informixdb",
+        "SERVER": "informix",
+        "NAME": "sysmaster",
+        "USER": "informix",
+        "PASSWORD": "in4mix",
+        "OPTIONS": {"VALIDATE_CONNECTION": True},
+        "AUTOCOMMIT": True,
+        "CONN_MAX_AGE": None,
+        "TIME_ZONE": None,
+    })
+    db.connect()
+    db.validate_connection()
+    assert db.connection is None
+
+
+def test_DatabaseWrapper_validate_connection_does_not_close_connection_if_not_enabled(
+    mock_autocommit_methods, mock_is_usable
+):
+    mock_is_usable.return_value = False
+    db = DatabaseWrapper({
+        "ENGINE": "django_informixdb",
+        "SERVER": "informix",
+        "NAME": "sysmaster",
+        "USER": "informix",
+        "PASSWORD": "in4mix",
+        "OPTIONS": {"VALIDATE_CONNECTION": False},
+        "AUTOCOMMIT": True,
+        "CONN_MAX_AGE": None,
+        "TIME_ZONE": None,
+    })
+    db.connect()
+    db.validate_connection()
+    assert db.connection is not None
+
+
+def test_DatabaseWrapper_validate_connection_handles_closed_connections(mock_autocommit_methods):
+    db = DatabaseWrapper({
+        "ENGINE": "django_informixdb",
+        "SERVER": "informix",
+        "NAME": "sysmaster",
+        "USER": "informix",
+        "PASSWORD": "in4mix",
+        "OPTIONS": {"VALIDATE_CONNECTION": True},
+        "AUTOCOMMIT": True,
+        "CONN_MAX_AGE": 0,  # this will make close_if_unusable_or_obsolete close the connection
+        "TIME_ZONE": None,
+    })
+    db.connect()
+    db.validate_connection()
+    assert db.connection is None
+
+
 def test_DatabaseWrapper_get_new_connection_calls_pyodbc_connect(mocker):
     mock_connect = mocker.patch("pyodbc.connect", autospec=True)
     db = DatabaseWrapper({
