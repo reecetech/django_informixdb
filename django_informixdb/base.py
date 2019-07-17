@@ -362,17 +362,21 @@ class DatabaseWrapper(BaseDatabaseWrapper):
 
         try:
             cursor.execute(self._validation_query)
+            return True
         except pyodbc.Error as exc:
             logger.info(f"error executing query: {exc}")
             return False
         finally:
+            # We close the cursor explicitly to work around the pyodbc bug
+            # described at the top of this function. If closing the cursor
+            # fails we set the return value to `False`. Otherwise it
+            # remains what was returned in the `try` or `except` block, which
+            # depends on whether `cursor.execute` succeeded or not.
             try:
                 cursor.close()
             except pyodbc.Error as exc:
                 logger.info(f"error closing cursor: {exc}")
                 return False
-
-        return True
 
     def read_dirty(self):
         self.cursor().execute('set isolation to dirty read;')
