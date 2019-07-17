@@ -356,17 +356,20 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         # cursor: https://github.com/mkleehammer/pyodbc/issues/585
         try:
             cursor = self.connection.cursor()
-        except pyodbc.Error:
+        except pyodbc.Error as exc:
+            logger.info(f"error creating cursor: {exc}")
             return False
 
         try:
             cursor.execute(self._validation_query)
-        except pyodbc.Error:
+        except pyodbc.Error as exc:
+            logger.info(f"error executing query: {exc}")
             return False
         finally:
             try:
                 cursor.close()
-            except pyodbc.Error:
+            except pyodbc.Error as exc:
+                logger.info(f"error closing cursor: {exc}")
                 return False
 
         return True

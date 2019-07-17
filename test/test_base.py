@@ -114,30 +114,33 @@ def test_DatabaseWrapper_is_usable(mocker, mock_autocommit_methods, db_config):
 
 
 def test_DatabaseWrapper_is_usable_returns_false_if_creating_cursor_fails(
-    mocker, mock_connection, mock_autocommit_methods, db_config,
+    caplog, mocker, mock_connection, mock_autocommit_methods, db_config
 ):
-    mock_connection.cursor.side_effect = pyodbc.Error()
+    mock_connection.cursor.side_effect = pyodbc.Error("", "error message 1")
     db = DatabaseWrapper(db_config)
     db.connect()
     assert db.is_usable() is False
+    assert "error message 1" in caplog.text
 
 
 def test_DatabaseWrapper_is_usable_returns_false_if_execute_raises_error(
-    mocker, mock_connection, mock_autocommit_methods, db_config,
+    caplog, mocker, mock_connection, mock_autocommit_methods, db_config
 ):
-    mock_connection.cursor.return_value.execute.side_effect = pyodbc.Error()
+    mock_connection.cursor.return_value.execute.side_effect = pyodbc.Error("", "error message 1")
     db = DatabaseWrapper(db_config)
     db.connect()
     assert db.is_usable() is False
+    assert "error message 1" in caplog.text
 
 
 def test_DatabaseWrapper_is_usable_returns_false_if_closing_cursor_raises_error(
-    mocker, mock_connection, mock_autocommit_methods, db_config,
+    caplog, mocker, mock_connection, mock_autocommit_methods, db_config
 ):
-    mock_connection.cursor.return_value.close.side_effect = pyodbc.Error()
+    mock_connection.cursor.return_value.close.side_effect = pyodbc.Error("", "error message 1")
     db = DatabaseWrapper(db_config)
     db.connect()
     assert db.is_usable() is False
+    assert "error message 1" in caplog.text
 
 
 def test_DatabaseWrapper_get_new_connection_calls_pyodbc_connect(mock_connect, db_config):

@@ -1,3 +1,4 @@
+import pytest
 from django.conf import settings
 
 
@@ -20,3 +21,8 @@ def pytest_configure():
             },
         },
     )
+
+
+@pytest.fixture(autouse=True)
+def configure_caplog(caplog):
+    caplog.set_level("INFO")
