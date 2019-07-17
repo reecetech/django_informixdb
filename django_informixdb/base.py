@@ -351,13 +351,25 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         self.cursor().execute(start_sql)
 
     def is_usable(self):
+        # We create a cursor and then explicitly close it as there is a bug
+        # that is encountered when relying on garbage collection to close the
+        # cursor: https://github.com/mkleehammer/pyodbc/issues/585
         try:
-            # Use a cursor directly, bypassing Django's utilities.
-            self.connection.cursor().execute(self._validation_query)
+            cursor = self.connection.cursor()
         except pyodbc.Error:
             return False
-        else:
-            return True
+
+        try:
+            cursor.execute(self._validation_query)
+        except pyodbc.Error:
+            return False
+        finally:
+            try:
+                cursor.close()
+            except pyodbc.Error:
+                return False
+
+        return True
 
     def read_dirty(self):
         self.cursor().execute('set isolation to dirty read;')
