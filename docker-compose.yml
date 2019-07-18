@@ -2,7 +2,7 @@ version: '3'
 
 services:
     db:
-        image: ibmcom/informix-developer-database
+        image: ibmcom/informix-developer-database:12.10.FC12W1DE
         tty: true # Needed to ensure container doesn't self terminate
         environment:
             LICENSE: accept

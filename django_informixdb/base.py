@@ -11,10 +11,11 @@ import time
 import random
 import re
 
+from django.db import connections
 from django.db.backends.base.base import BaseDatabaseWrapper
 from django.db.backends.base.validation import BaseDatabaseValidation
 from django.core.exceptions import ImproperlyConfigured
-
+from django.core import signals
 from django.utils.six import binary_type, text_type
 from django.utils.encoding import smart_str
 
@@ -149,6 +150,8 @@ class DatabaseWrapper(BaseDatabaseWrapper):
 
         options = self.settings_dict.get('OPTIONS', {})
 
+        self._validation_enabled = options.get("VALIDATE_CONNECTION", False)
+        self._validation_query = options.get("VALIDATION_QUERY", "SELECT 1 FROM sysmaster:sysdual")
         self.encodings = options.get('encodings', ('utf-8', 'cp1252', 'iso-8859-1'))
         # make lookup operators to be collation-sensitive if needed
         self.collation = options.get('collation', None)
@@ -167,6 +170,23 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         self.creation = self.creation_class(self)
         self.introspection = self.introspection_class(self)
         self.validation = self.validation_class(self)
+
+    def validate_connection(self):
+        """
+        This method is invoked at the start of a request to verify an existing
+        connection is still functional. This is achieved by doing a simple query
+        against the database.
+        """
+        if not self._validation_enabled:
+            return
+        # We call close_if_unusable_or_obsolete to ensure obsolete connections
+        # are closed before we consider validating them. This will result in
+        # close_if_unusable_or_obsolete being called twice since it is also
+        # called automatically by django. This is ok since the second call is
+        # essentially a no-op.
+        self.close_if_unusable_or_obsolete()
+        if self.connection is not None and not self.is_usable():
+            self.close()
 
     def get_driver_path(self):
         system = platform.system().upper()
@@ -331,13 +351,32 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         self.cursor().execute(start_sql)
 
     def is_usable(self):
+        # We create a cursor and then explicitly close it as there is a bug
+        # that is encountered when relying on garbage collection to close the
+        # cursor: https://github.com/mkleehammer/pyodbc/issues/585
         try:
-            # Use a cursor directly, bypassing Django's utilities.
-            self.connection.cursor().execute("SELECT 1")
-        except pyodbc.Error:
+            cursor = self.connection.cursor()
+        except pyodbc.Error as exc:
+            logger.info(f"error creating cursor: {exc}")
             return False
-        else:
+
+        try:
+            cursor.execute(self._validation_query)
             return True
+        except pyodbc.Error as exc:
+            logger.info(f"error executing query: {exc}")
+            return False
+        finally:
+            # We close the cursor explicitly to work around the pyodbc bug
+            # described at the top of this function. If closing the cursor
+            # fails we set the return value to `False`. Otherwise it
+            # remains what was returned in the `try` or `except` block, which
+            # depends on whether `cursor.execute` succeeded or not.
+            try:
+                cursor.close()
+            except pyodbc.Error as exc:
+                logger.info(f"error closing cursor: {exc}")
+                return False
 
     def read_dirty(self):
         self.cursor().execute('set isolation to dirty read;')
@@ -493,3 +532,12 @@ class CursorWrapper(object):
 
     def __iter__(self):
         return iter(self.cursor)
+
+
+def _validate_connection(**kwargs):
+    for conn in connections.all():
+        if isinstance(conn, DatabaseWrapper):
+            conn.validate_connection()
+
+
+signals.request_started.connect(_validate_connection)

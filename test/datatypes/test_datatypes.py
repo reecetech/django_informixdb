@@ -2,7 +2,7 @@ from decimal import Decimal
 from collections import namedtuple
 
 import pytest
-from django.test import TestCase, TransactionTestCase
+from django.test import TestCase
 from django.db import connection, transaction
 from django.core.exceptions import ValidationError
 
