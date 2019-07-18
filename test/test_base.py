@@ -3,8 +3,7 @@ from unittest.mock import Mock, call
 import pyodbc
 import pytest
 
-from django_informixdb.base import DatabaseWrapper
-
+from django_informixdb.base import DatabaseWrapper, CursorWrapper
 
 CONNECTION_FAILED_ERROR = pyodbc.Error(
     "08004", "Attempt to connect to database server (<dbname>) failed. (-908) (SQLDriverConnect)"
@@ -19,18 +18,15 @@ AUTHENTICATION_ERROR = pyodbc.Error(
 
 
 @pytest.fixture
-def db_config():
-    return {
-        "ENGINE": "django_informixdb",
-        "SERVER": "informix",
-        "NAME": "sysmaster",
-        "USER": "informix",
-        "PASSWORD": "in4mix",
+def db_config(settings):
+    config = settings.DATABASES['default'].copy()
+    config.update({
         "OPTIONS": {},
         "AUTOCOMMIT": True,
         "CONN_MAX_AGE": None,
         "TIME_ZONE": None,
-    }
+    })
+    return config
 
 
 @pytest.fixture
@@ -248,3 +244,13 @@ def test_sleeps_between_connection_attempts(mocker, mock_sleep, mock_connect, db
         call(15, 100),
     ]
     assert mock_sleep.call_args_list == [call(1), call(2), call(3), call(4), call(5)]
+
+
+def test_Cursor_close_succeeds_if_connection_fails(caplog):
+    mock_cursor = Mock(close=Mock(side_effect=pyodbc.Error("", "error message 1")))
+    connection = Mock()
+    cursor = CursorWrapper(mock_cursor, connection)
+    cursor.close()
+    assert cursor.active is False
+    assert "error message 1" in caplog.text
+    connection.close.assert_called_once()

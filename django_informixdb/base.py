@@ -437,7 +437,12 @@ class CursorWrapper(object):
     def close(self):
         if self.active:
             self.active = False
-            self.cursor.close()
+            try:
+                self.cursor.close()
+            except pyodbc.Error as exc:
+                # typically the only errors we'll see here are connection-related
+                logger.info(f"error closing cursor: {exc}")
+                self.connection.close()
 
     def format_sql(self, sql, params):
         if isinstance(sql, text_type):

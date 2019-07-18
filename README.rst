@@ -281,7 +281,7 @@ For django_informixdb Developers
 --------------------------------
 
 To run the django_informixdb test suite, you need to set the INFORMIXDIR environment variable, and the tests
-expect an Informix database at host "dev". Change that host in `test/testproject/settings.py` if you need to.
+expect an Informix database at host "informix". Change the `SERVER` in `test/conftest.py` if you need to.
 Then run the test suite with:
 
     tox
@@ -291,6 +291,10 @@ This will run the tests under Django 1 and 2.
 
 Release History
 ---------------
+
+Version 1.9.0
+
+- Make `cursor.close()` more robust by handling connection errors during close.
 
 Version 1.8.0
 
