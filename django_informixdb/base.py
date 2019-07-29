@@ -151,6 +151,8 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         options = self.settings_dict.get('OPTIONS', {})
 
         self._validation_enabled = options.get("VALIDATE_CONNECTION", False)
+        self._validation_interval = options.get("VALIDATION_INTERVAL", 300)
+        self._next_validation = time.time() + self._validation_interval
         self._validation_query = options.get("VALIDATION_QUERY", "SELECT 1 FROM sysmaster:sysdual")
         self.encodings = options.get('encodings', ('utf-8', 'cp1252', 'iso-8859-1'))
         # make lookup operators to be collation-sensitive if needed
@@ -177,8 +179,11 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         connection is still functional. This is achieved by doing a simple query
         against the database.
         """
-        if not self._validation_enabled:
+        if not self._validation_enabled or time.time() < self._next_validation:
             return
+
+        self._next_validation = time.time() + self._validation_interval
+
         # We call close_if_unusable_or_obsolete to ensure obsolete connections
         # are closed before we consider validating them. This will result in
         # close_if_unusable_or_obsolete being called twice since it is also
