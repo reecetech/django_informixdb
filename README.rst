@@ -116,6 +116,10 @@ VALIDATE_CONNECTION
     Whether existing connections should be validated at the start of the request. Defaults to
     `False`.
 
+VALIDATION_INTERVAL
+    How often in seconds to revalidate connections if `VALIDATE_CONNECTION` is enabled. Defaults to
+    `300` (5 minutes).
+
 VALIDATION_QUERY
     Query used to validate whether a connection is usable. Defaults to
     `"SELECT 1 FROM sysmaster:sysdual"`.
@@ -281,7 +285,7 @@ For django_informixdb Developers
 --------------------------------
 
 To run the django_informixdb test suite, you need to set the INFORMIXDIR environment variable, and the tests
-expect an Informix database at host "dev". Change that host in `test/testproject/settings.py` if you need to.
+expect an Informix database at host "informix". Change that host in `test/conftest.py` if you need to.
 Then run the test suite with:
 
     tox
@@ -291,6 +295,10 @@ This will run the tests under Django 1 and 2.
 
 Release History
 ---------------
+
+Version 1.9.0
+
+- Enable setting a validation interval.
 
 Version 1.8.0
 

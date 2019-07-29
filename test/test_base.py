@@ -1,7 +1,9 @@
 from unittest.mock import Mock, call
+from datetime import timedelta
 
 import pyodbc
 import pytest
+from freezegun import freeze_time
 
 from django_informixdb.base import DatabaseWrapper
 
@@ -41,7 +43,7 @@ def mock_autocommit_methods(mocker):
 
 @pytest.fixture
 def mock_is_usable(mocker):
-    yield mocker.patch.object(DatabaseWrapper, "is_usable", return_value=False, autospec=True)
+    yield mocker.patch.object(DatabaseWrapper, "is_usable", return_value=True, autospec=True)
 
 
 @pytest.fixture
@@ -73,7 +75,7 @@ def test_DatabaseWrapper_validate_connection_closes_connections_that_are_not_usa
     mock_is_usable.return_value = False
     db = DatabaseWrapper({
         **db_config,
-        "OPTIONS": {"VALIDATE_CONNECTION": True},
+        "OPTIONS": {"VALIDATE_CONNECTION": True, "VALIDATION_INTERVAL": 0},
     })
     db.connect()
     db.validate_connection()
@@ -86,7 +88,7 @@ def test_DatabaseWrapper_validate_connection_does_not_close_connection_if_not_en
     mock_is_usable.return_value = False
     db = DatabaseWrapper({
         **db_config,
-        "OPTIONS": {"VALIDATE_CONNECTION": False},
+        "OPTIONS": {"VALIDATE_CONNECTION": False, "VALIDATION_INTERVAL": 0},
     })
     db.connect()
     db.validate_connection()
@@ -98,12 +100,40 @@ def test_DatabaseWrapper_validate_connection_handles_closed_connections(
 ):
     db = DatabaseWrapper({
         **db_config,
-        "OPTIONS": {"VALIDATE_CONNECTION": True},
+        "OPTIONS": {"VALIDATE_CONNECTION": True, "VALIDATION_INTERVAL": 0},
         "CONN_MAX_AGE": 0,  # this will make close_if_unusable_or_obsolete close the connection
     })
     db.connect()
     db.validate_connection()
     assert db.connection is None
+
+
+def test_connection_is_not_revalidated_within_validation_interval(
+    mock_is_usable, mock_autocommit_methods, db_config
+):
+    with freeze_time() as frozen_time:
+        db = DatabaseWrapper({
+            **db_config,
+            "OPTIONS": {
+                "VALIDATE_CONNECTION": True,
+                "VALIDATION_INTERVAL": 10,
+            },
+        })
+        db.connect()
+
+        frozen_time.tick(delta=timedelta(seconds=10))
+        db.validate_connection()
+        assert mock_is_usable.called is True
+
+        mock_is_usable.reset_mock()
+
+        frozen_time.tick(delta=timedelta(seconds=5))
+        db.validate_connection()
+        assert mock_is_usable.called is False
+
+        frozen_time.tick(delta=timedelta(seconds=5))
+        db.validate_connection()
+        assert mock_is_usable.called is True
 
 
 def test_DatabaseWrapper_is_usable(mocker, mock_autocommit_methods, db_config):
