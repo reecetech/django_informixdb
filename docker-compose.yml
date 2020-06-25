@@ -1,9 +1,28 @@
-version: '3'
+---
+version: '3.6'
 
 services:
+    test-runner:
+        image: ${test_runner_tag:-djifx:test-runner}
+        build:
+            context: .
+            dockerfile: Dockerfile.testing
+        environment:
+            INFORMIXDIR: /opt/IBM/informix
+            INFORMIXSQLHOSTS: /opt/IBM/informix/etc/sqlhosts
+            LD_LIBRARY_PATH: /opt/IBM/informix/lib:/opt/IBM/informix/lib/cli:/opt/IBM/informix/lib/esql
+        volumes:
+            - type: bind
+              source: ./docker-compose.sqlhosts
+              target: /opt/IBM/informix/etc/sqlhosts
+        depends_on:
+            - db
+        links:
+            - db:informix
     db:
-        image: ibmcom/informix-developer-database:12.10.FC12W1DE
-        tty: true # Needed to ensure container doesn't self terminate
+        image: ibmcom/informix-developer-database:${ifx_version:-14.10.FC3DE}
+        tty: true  # Needed to ensure container doesn't self terminate
+        hostname: db
         environment:
             LICENSE: accept
             DB_USER: adapter
@@ -16,3 +35,5 @@ services:
             - "27017:27017"
             - "27018:27018"
             - "27883:27883"
+
+# vim: set sw=4:
