@@ -293,6 +293,17 @@ Then run the test suite with:
 This will run the tests under Django 1 and 2.
 
 
+Docker based testing
+^^^^^^^^^^^^^^^^^^^^
+
+If you don't want to install the Informix libraries and multiple versions of Python locally, then you can test within
+Docker containers.
+
+Try using the helper script `test-in-docker.sh`, or inspect the script and adapt for your own purposes.
+
+Requirements: Docker 19.03.2 or newer and Docker Compose 1.24.1 or newer.
+
+
 Release History
 ---------------
 

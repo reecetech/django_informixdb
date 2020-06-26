@@ -1,0 +1,172 @@
+# vim: set ft=dockerfile:
+
+##------------------------------------------------------------------------------
+FROM python:3.6 AS py36
+
+RUN echo "${PYTHON_VERSION}" > /tmp/py36-latest
+
+##------------------------------------------------------------------------------
+FROM python:3.7 AS py37
+
+RUN echo "${PYTHON_VERSION}" > /tmp/py37-latest
+
+##------------------------------------------------------------------------------
+FROM python:3.8 AS py38
+
+RUN echo "${PYTHON_VERSION}" > /tmp/py38-latest
+
+##------------------------------------------------------------------------------
+FROM centos:7 AS base
+
+RUN yum clean all \
+ && yum update -y \
+ && yum install -y \
+        unixODBC \
+ && yum clean all \
+ && rm -rf /var/yum/cache
+
+##------------------------------------------------------------------------------
+FROM base AS builder-base
+
+RUN yum install -y \
+        make \
+        yum-utils
+
+RUN yum-builddep -y python3
+
+# For pyodbc
+RUN yum install -y \
+        unixODBC-devel
+
+RUN mkdir /src
+
+##------------------------------------------------------------------------------
+FROM builder-base AS builder-py36
+
+RUN mkdir /opt/py36 && chown -R 3036 /opt/py36 /src
+USER 3036
+WORKDIR /tmp
+
+COPY --from=py36 /tmp/py36-latest /tmp/
+
+RUN export PYTHON_VERSION="$(cat /tmp/py36-latest)" \
+ && curl --silent --show-error --fail --location \
+        "https://www.python.org/ftp/python/${PYTHON_VERSION}/Python-${PYTHON_VERSION}.tgz" \
+    | tar -xz
+
+RUN export PYTHON_VERSION="$(cat /tmp/py36-latest)" \
+ && cd "/tmp/Python-${PYTHON_VERSION}" \
+ && ./configure --prefix=/opt/py36 \
+ && make install
+
+USER root
+ENV PATH=/opt/py36/bin:"${PATH}"
+RUN pip3 install tox
+USER 3036
+
+ENV HOME=/src
+ENV PATH=/opt/py36/bin:"${PATH}"
+WORKDIR /src
+
+ADD django_informixdb/ /src/django_informixdb/
+ADD README.rst setup.* tox.ini /src/
+RUN tox -e "$(tox --listenvs | grep py36 | tr '\n' ',')" --notest  # prep venvs
+
+##------------------------------------------------------------------------------
+FROM builder-base AS builder-py37
+
+RUN mkdir /opt/py37 && chown -R 3037 /opt/py37 /src
+USER 3037
+WORKDIR /tmp
+
+COPY --from=py37 /tmp/py37-latest /tmp/
+
+RUN export PYTHON_VERSION="$(cat /tmp/py37-latest)" \
+ && curl --silent --show-error --fail --location \
+        "https://www.python.org/ftp/python/${PYTHON_VERSION}/Python-${PYTHON_VERSION}.tgz" \
+    | tar -xz
+
+RUN export PYTHON_VERSION="$(cat /tmp/py37-latest)" \
+ && cd "/tmp/Python-${PYTHON_VERSION}" \
+ && ./configure --prefix=/opt/py37 \
+ && make install
+
+USER root
+ENV PATH=/opt/py37/bin:"${PATH}"
+RUN pip3 install tox
+USER 3037
+
+ENV HOME=/src
+ENV PATH=/opt/py37/bin:"${PATH}"
+WORKDIR /src
+
+ADD django_informixdb/ /src/django_informixdb/
+ADD README.rst setup.* tox.ini /src/
+RUN tox -e "$(tox --listenvs | grep py37 | tr '\n' ',')" --notest  # prep venvs
+
+##------------------------------------------------------------------------------
+FROM builder-base AS builder-py38
+
+RUN mkdir /opt/py38 && chown -R 3038 /opt/py38 /src
+USER 3038
+WORKDIR /tmp
+
+COPY --from=py38 /tmp/py38-latest /tmp/
+
+RUN export PYTHON_VERSION="$(cat /tmp/py38-latest)" \
+ && curl --silent --show-error --fail --location \
+        "https://www.python.org/ftp/python/${PYTHON_VERSION}/Python-${PYTHON_VERSION}.tgz" \
+    | tar -xz
+
+RUN export PYTHON_VERSION="$(cat /tmp/py38-latest)" \
+ && cd "/tmp/Python-${PYTHON_VERSION}" \
+ && ./configure --prefix=/opt/py38 \
+ && make install
+
+USER root
+ENV PATH=/opt/py38/bin:"${PATH}"
+RUN pip3 install tox
+USER 3038
+
+ENV HOME=/src
+ENV PATH=/opt/py38/bin:"${PATH}"
+WORKDIR /src
+
+ADD django_informixdb/ /src/django_informixdb/
+ADD README.rst setup.* tox.ini /src/
+RUN tox -e "$(tox --listenvs | grep py38 | tr '\n' ',')" --notest  # prep venvs
+
+##------------------------------------------------------------------------------
+FROM base AS multipy
+
+COPY --from=builder-py36 /opt/py36/ /opt/py36/
+COPY --from=builder-py37 /opt/py37/ /opt/py37/
+
+COPY --from=builder-py36 /src/.tox/ /src/.tox/
+COPY --from=builder-py36 /src/.cache/ /src/.cache/
+
+COPY --from=builder-py37 /src/.tox/ /src/.tox/
+COPY --from=builder-py37 /src/.cache/ /src/.cache/
+
+ENV PATH=/opt/py38/bin:/opt/py37/bin:/opt/py36/bin:"${PATH}"
+RUN pip3 --no-cache-dir install tox
+
+##------------------------------------------------------------------------------
+FROM base AS csdk
+
+COPY --from=ibmcom/informix-developer-sandbox@sha256:678250715879a7cbdd2ea658ff7ecd7087dcaf0b8e39d47c936916edff62c5ec \
+        /home/informix/odbc/ /opt/IBM/informix/
+RUN chown -R 3793 /opt/IBM
+
+##------------------------------------------------------------------------------
+FROM multipy AS test-runner
+
+COPY --from=csdk /opt/IBM/ /opt/IBM/
+
+# make more specific ?
+ADD . /src/
+RUN chown -R 3793 /src
+
+USER 3793
+ENV HOME=/src
+WORKDIR /src
