@@ -42,113 +42,117 @@ RUN mkdir /src
 
 ##------------------------------------------------------------------------------
 FROM builder-base AS builder-py36
+ARG PYVER=36
+COPY --from=py36 /tmp/py${PYVER}-latest /tmp/
 
-RUN mkdir /opt/py36 && chown -R 3036 /opt/py36 /src
-USER 3036
+RUN mkdir /opt/py${PYVER} && chown -R 30${PYVER} /opt/py${PYVER} /src
+USER 30${PYVER}
 WORKDIR /tmp
 
-COPY --from=py36 /tmp/py36-latest /tmp/
-
-RUN export PYTHON_VERSION="$(cat /tmp/py36-latest)" \
+RUN export PYTHON_VERSION="$(cat /tmp/py${PYVER}-latest)" \
  && curl --silent --show-error --fail --location \
         "https://www.python.org/ftp/python/${PYTHON_VERSION}/Python-${PYTHON_VERSION}.tgz" \
     | tar -xz
 
-RUN export PYTHON_VERSION="$(cat /tmp/py36-latest)" \
+RUN export PYTHON_VERSION="$(cat /tmp/py${PYVER}-latest)" \
  && cd "/tmp/Python-${PYTHON_VERSION}" \
- && ./configure --prefix=/opt/py36 \
+ && ./configure --prefix=/opt/py${PYVER} \
  && make install
 
 USER root
-ENV PATH=/opt/py36/bin:"${PATH}"
+ENV PATH=/opt/py${PYVER}/bin:"${PATH}"
 RUN pip3 install tox
-USER 3036
+USER 30${PYVER}
 
 ENV HOME=/src
-ENV PATH=/opt/py36/bin:"${PATH}"
+ENV PATH=/opt/py${PYVER}/bin:"${PATH}"
 WORKDIR /src
 
 ADD django_informixdb/ /src/django_informixdb/
 ADD README.rst setup.* tox.ini /src/
-RUN tox -e "$(tox --listenvs | grep py36 | tr '\n' ',')" --notest  # prep venvs
+RUN tox -e "$(tox --listenvs | grep py${PYVER} | tr '\n' ',')" --notest  # prep venvs
 
 ##------------------------------------------------------------------------------
 FROM builder-base AS builder-py37
+ARG PYVER=37
+COPY --from=py37 /tmp/py${PYVER}-latest /tmp/
 
-RUN mkdir /opt/py37 && chown -R 3037 /opt/py37 /src
-USER 3037
+RUN mkdir /opt/py${PYVER} && chown -R 30${PYVER} /opt/py${PYVER} /src
+USER 30${PYVER}
 WORKDIR /tmp
 
-COPY --from=py37 /tmp/py37-latest /tmp/
-
-RUN export PYTHON_VERSION="$(cat /tmp/py37-latest)" \
+RUN export PYTHON_VERSION="$(cat /tmp/py${PYVER}-latest)" \
  && curl --silent --show-error --fail --location \
         "https://www.python.org/ftp/python/${PYTHON_VERSION}/Python-${PYTHON_VERSION}.tgz" \
     | tar -xz
 
-RUN export PYTHON_VERSION="$(cat /tmp/py37-latest)" \
+RUN export PYTHON_VERSION="$(cat /tmp/py${PYVER}-latest)" \
  && cd "/tmp/Python-${PYTHON_VERSION}" \
- && ./configure --prefix=/opt/py37 \
+ && ./configure --prefix=/opt/py${PYVER} \
  && make install
 
 USER root
-ENV PATH=/opt/py37/bin:"${PATH}"
+ENV PATH=/opt/py${PYVER}/bin:"${PATH}"
 RUN pip3 install tox
-USER 3037
+USER 30${PYVER}
 
 ENV HOME=/src
-ENV PATH=/opt/py37/bin:"${PATH}"
+ENV PATH=/opt/py${PYVER}/bin:"${PATH}"
 WORKDIR /src
 
 ADD django_informixdb/ /src/django_informixdb/
 ADD README.rst setup.* tox.ini /src/
-RUN tox -e "$(tox --listenvs | grep py37 | tr '\n' ',')" --notest  # prep venvs
+RUN tox -e "$(tox --listenvs | grep py${PYVER} | tr '\n' ',')" --notest  # prep venvs
 
 ##------------------------------------------------------------------------------
 FROM builder-base AS builder-py38
+ARG PYVER=38
+COPY --from=py38 /tmp/py${PYVER}-latest /tmp/
 
-RUN mkdir /opt/py38 && chown -R 3038 /opt/py38 /src
-USER 3038
+RUN mkdir /opt/py${PYVER} && chown -R 30${PYVER} /opt/py${PYVER} /src
+USER 30${PYVER}
 WORKDIR /tmp
 
-COPY --from=py38 /tmp/py38-latest /tmp/
-
-RUN export PYTHON_VERSION="$(cat /tmp/py38-latest)" \
+RUN export PYTHON_VERSION="$(cat /tmp/py${PYVER}-latest)" \
  && curl --silent --show-error --fail --location \
         "https://www.python.org/ftp/python/${PYTHON_VERSION}/Python-${PYTHON_VERSION}.tgz" \
     | tar -xz
 
-RUN export PYTHON_VERSION="$(cat /tmp/py38-latest)" \
+RUN export PYTHON_VERSION="$(cat /tmp/py${PYVER}-latest)" \
  && cd "/tmp/Python-${PYTHON_VERSION}" \
- && ./configure --prefix=/opt/py38 \
+ && ./configure --prefix=/opt/py${PYVER} \
  && make install
 
 USER root
-ENV PATH=/opt/py38/bin:"${PATH}"
+ENV PATH=/opt/py${PYVER}/bin:"${PATH}"
 RUN pip3 install tox
-USER 3038
+USER 30${PYVER}
 
 ENV HOME=/src
-ENV PATH=/opt/py38/bin:"${PATH}"
+ENV PATH=/opt/py${PYVER}/bin:"${PATH}"
 WORKDIR /src
 
 ADD django_informixdb/ /src/django_informixdb/
 ADD README.rst setup.* tox.ini /src/
-RUN tox -e "$(tox --listenvs | grep py38 | tr '\n' ',')" --notest  # prep venvs
+RUN tox -e "$(tox --listenvs | grep py${PYVER} | tr '\n' ',')" --notest  # prep venvs
+
 
 ##------------------------------------------------------------------------------
 FROM base AS multipy
 
 COPY --from=builder-py36 /opt/py36/ /opt/py36/
-COPY --from=builder-py37 /opt/py37/ /opt/py37/
-
 COPY --from=builder-py36 /src/.tox/ /src/.tox/
 COPY --from=builder-py36 /src/.cache/ /src/.cache/
 
+COPY --from=builder-py37 /opt/py37/ /opt/py37/
 COPY --from=builder-py37 /src/.tox/ /src/.tox/
 COPY --from=builder-py37 /src/.cache/ /src/.cache/
 
-ENV PATH=/opt/py38/bin:/opt/py37/bin:/opt/py36/bin:"${PATH}"
+COPY --from=builder-py38 /opt/py38/ /opt/py38/
+COPY --from=builder-py38 /src/.tox/ /src/.tox/
+COPY --from=builder-py38 /src/.cache/ /src/.cache/
+
+ENV PATH=/opt/py38/bin:/opt/py37/bin:/opt/py36/bin:/opt/py35/bin:"${PATH}"
 RUN pip3 --no-cache-dir install tox
 
 ##------------------------------------------------------------------------------
