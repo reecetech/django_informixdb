@@ -3,7 +3,7 @@ version: '3.6'
 
 services:
     test-runner:
-        image: ${test_runner_tag:-djifx:test-runner}
+        image: ${uniq_test_id:-djifx}:test-runner
         build:
             context: .
             dockerfile: Dockerfile.testing
@@ -11,12 +11,15 @@ services:
             INFORMIXDIR: /opt/IBM/informix
             INFORMIXSQLHOSTS: /opt/IBM/informix/etc/sqlhosts
             LD_LIBRARY_PATH: /opt/IBM/informix/lib:/opt/IBM/informix/lib/cli:/opt/IBM/informix/lib/esql
+            TRAVIS: ${TRAVIS:-}
         volumes:
             - type: bind
               source: ./docker-compose.sqlhosts
               target: /opt/IBM/informix/etc/sqlhosts
         depends_on:
             - db
+        networks:
+            - test
         links:
             - db:informix
     db:
@@ -29,11 +32,17 @@ services:
             DB_NAME: adapter
             DB_PASS: adapter
         privileged: true
+        networks:
+            - test
         ports:
             - "9088:9088"
             - "9089:9089"
             - "27017:27017"
             - "27018:27018"
             - "27883:27883"
+
+networks:
+    test:
+        name: ${uniq_test_id:-djifx}
 
 # vim: set sw=4:
