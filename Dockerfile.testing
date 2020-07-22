@@ -170,7 +170,7 @@ COPY --from=builder-py38 /src/.cache/ /src/.cache/
 ADD wait-for-deps.sh /usr/local/bin
 RUN chmod a+rx /usr/local/bin/wait-for-deps.sh
 
-ADD --chown=${nonroot_uid} README.rst setup.* tox.ini .pylintrc /src/
+ADD --chown=${nonroot_uid} README.rst setup.* tox.ini /src/
 ADD --chown=${nonroot_uid} django_informixdb/ /src/django_informixdb/
 ADD --chown=${nonroot_uid} test/ /src/test/
 RUN chown ${nonroot_uid} /src
