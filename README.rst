@@ -307,6 +307,11 @@ Requirements: Docker 19.03.2 or newer and Docker Compose 1.24.1 or newer.
 Release History
 ---------------
 
+Version 1.10.0
+
+- Begin support for Django 3.x
+- Begin support for Python 3.9
+
 Version 1.9.1
 
 - Begin support for Python 3.7 and 3.8

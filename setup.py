@@ -27,10 +27,11 @@ setup(
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
     ],
     keywords='django informix',
     packages=find_packages(exclude=['contrib', 'docs', 'tests']),
-    install_requires=['django~=2.2.0', 'pyodbc~=4.0.21'],
+    install_requires=['django>=2.2.0,<4', 'pyodbc~=4.0.21'],
     extras_require={
         'dev': ['check-manifest'],
         'test': ['coverage'],
