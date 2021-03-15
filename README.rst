@@ -290,7 +290,7 @@ Then run the test suite with:
 
     tox
 
-This will run the tests under Django 1 and 2.
+This will run the tests under Django 2 and 3.
 
 
 Docker based testing
