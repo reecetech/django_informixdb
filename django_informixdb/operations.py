@@ -121,7 +121,10 @@ class DatabaseOperations(BaseDatabaseOperations):
     def adapt_timefield_value(self, value):
         return value
 
-    def sql_flush(self, style, tables, sequences, allow_cascade=False):
+    def sql_flush(self, style, tables, sequences=(), reset_sequences=True, allow_cascade=False):
+        # The reset_sequences keyword arg is provided by Django 3.1 and later,
+        # but like the sequences arg, it is ignored by this driver.
+
         # NB: The generated SQL below is specific to Informix
         sql = ['%s %s %s;' % (
             style.SQL_KEYWORD('DELETE'),

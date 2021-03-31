@@ -16,7 +16,6 @@ from django.db.backends.base.base import BaseDatabaseWrapper
 from django.db.backends.base.validation import BaseDatabaseValidation
 from django.core.exceptions import ImproperlyConfigured
 from django.core import signals
-from django.utils.six import binary_type, text_type
 from django.utils.encoding import smart_str
 
 from .client import DatabaseClient
@@ -39,7 +38,7 @@ logger = logging.getLogger(__name__)
 def decoder(value, encodings=('utf-8',)):
     """This decoder tries multiple encodings before giving up"""
 
-    if not isinstance(value, binary_type):
+    if not isinstance(value, bytes):
         raise ValueError(f"Not a binary type: {value} {type(value)}")
 
     for enc in encodings:
@@ -445,7 +444,7 @@ class CursorWrapper(object):
             self.cursor.close()
 
     def format_sql(self, sql, params):
-        if isinstance(sql, text_type):
+        if isinstance(sql, str):
             # FreeTDS (and other ODBC drivers?) doesn't support Unicode
             # yet, so we need to encode the SQL clause itself in utf-8
             sql = smart_str(sql, self.driver_charset)
@@ -461,7 +460,7 @@ class CursorWrapper(object):
         fp = []
         if params is not None:
             for p in params:
-                if isinstance(p, text_type):
+                if isinstance(p, str):
                     if self.driver_charset:
                         # FreeTDS (and other ODBC drivers?) doesn't support Unicode
                         # yet, so we need to encode parameters in utf-8
@@ -469,7 +468,7 @@ class CursorWrapper(object):
                     else:
                         fp.append(p)
 
-                elif isinstance(p, binary_type):
+                elif isinstance(p, bytes):
                     fp.append(p)
 
                 elif isinstance(p, type(True)):
@@ -511,7 +510,7 @@ class CursorWrapper(object):
                 f = row[i]
                 # FreeTDS (and other ODBC drivers?) doesn't support Unicode
                 # yet, so we need to decode utf-8 data coming from the DB
-                if isinstance(f, binary_type):
+                if isinstance(f, bytes):
                     row[i] = f.decode(self.driver_charset)
         return tuple(row)
 

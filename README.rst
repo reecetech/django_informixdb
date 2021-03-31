@@ -290,7 +290,7 @@ Then run the test suite with:
 
     tox
 
-This will run the tests under Django 1 and 2.
+This will run the tests under Django 2 and 3.
 
 
 Docker based testing
@@ -306,6 +306,11 @@ Requirements: Docker 19.03.2 or newer and Docker Compose 1.24.1 or newer.
 
 Release History
 ---------------
+
+Version 1.10.0
+
+- Begin support for Django 3.x
+- Begin support for Python 3.9
 
 Version 1.9.1
 

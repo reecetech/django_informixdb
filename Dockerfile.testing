@@ -19,6 +19,11 @@ FROM python:3.8 AS py38
 RUN echo "${PYTHON_VERSION}" > /tmp/py38-latest
 
 ##------------------------------------------------------------------------------
+FROM python:3.9 AS py39
+
+RUN echo "${PYTHON_VERSION}" > /tmp/py39-latest
+
+##------------------------------------------------------------------------------
 FROM centos:7 AS base
 
 RUN yum clean all \
@@ -144,6 +149,39 @@ ADD README.rst setup.* tox.ini /src/
 RUN tox -e "$(tox --listenvs | grep py${py_ver} | tr '\n' ',')" --notest  # prep venvs
 
 ##------------------------------------------------------------------------------
+FROM builder-base AS builder-py39
+ARG py_ver=39
+ARG nonroot_uid
+COPY --from=py39 /tmp/py${py_ver}-latest /tmp/
+
+RUN mkdir /opt/py${py_ver} && chown -R ${nonroot_uid} /opt/py${py_ver} /src
+USER ${nonroot_uid}
+WORKDIR /tmp
+
+RUN export PYTHON_VERSION="$(cat /tmp/py${py_ver}-latest)" \
+ && curl --silent --show-error --fail --location \
+        "https://www.python.org/ftp/python/${PYTHON_VERSION}/Python-${PYTHON_VERSION}.tgz" \
+    | tar -xz
+
+RUN export PYTHON_VERSION="$(cat /tmp/py${py_ver}-latest)" \
+ && cd "/tmp/Python-${PYTHON_VERSION}" \
+ && ./configure --prefix=/opt/py${py_ver} \
+ && make install
+
+USER root
+ENV PATH=/opt/py${py_ver}/bin:"${PATH}"
+RUN pip3 install tox
+USER ${nonroot_uid}
+
+ENV HOME=/src
+ENV PATH=/opt/py${py_ver}/bin:"${PATH}"
+WORKDIR /src
+
+ADD django_informixdb/ /src/django_informixdb/
+ADD README.rst setup.* tox.ini /src/
+RUN tox -e "$(tox --listenvs | grep py${py_ver} | tr '\n' ',')" --notest  # prep venvs
+
+##------------------------------------------------------------------------------
 FROM base AS csdk
 ARG nonroot_uid
 
@@ -167,6 +205,10 @@ COPY --from=builder-py38 /opt/py38/ /opt/py38/
 COPY --from=builder-py38 /src/.tox/ /src/.tox/
 COPY --from=builder-py38 /src/.cache/ /src/.cache/
 
+COPY --from=builder-py39 /opt/py39/ /opt/py39/
+COPY --from=builder-py39 /src/.tox/ /src/.tox/
+COPY --from=builder-py39 /src/.cache/ /src/.cache/
+
 ADD wait-for-deps.sh /usr/local/bin
 RUN chmod a+rx /usr/local/bin/wait-for-deps.sh
 
@@ -175,7 +217,7 @@ ADD --chown=${nonroot_uid} django_informixdb/ /src/django_informixdb/
 ADD --chown=${nonroot_uid} test/ /src/test/
 RUN chown ${nonroot_uid} /src
 
-ENV PATH=/opt/py38/bin:/opt/py37/bin:/opt/py36/bin:/opt/py35/bin:"${PATH}"
+ENV PATH=/opt/py39/bin:/opt/py38/bin:/opt/py37/bin:/opt/py36/bin:"${PATH}"
 RUN pip3 --no-cache-dir install tox
 
 USER ${nonroot_uid}
