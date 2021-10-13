@@ -27,7 +27,7 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
         """
 
         cursor.execute(query_format.format(table_name))
-        columns = [[c[0], c[3] % 256, None, c[4], c[4], None, 0 if c[3] > 256 else 1, None]
+        columns = [[c[0], c[3] % 256, None, c[4], c[4], None, 0 if c[3] > 256 else 1, None, cursor.db.collation]
                    for c in cursor.fetchall()]
         items = []
         for column in columns:
