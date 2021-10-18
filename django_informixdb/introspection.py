@@ -17,7 +17,16 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
         ]
 
     def get_table_description(self, cursor, table_name):
-        "Returns a description of the table, with the DB-API cursor.description interface."
+        """Returns a description of the table, with the DB-API cursor.description interface.
+
+        The FieldInfo metadata must be provided in the format described in Django's
+        django/db/backends/base/introspection.py:
+
+        name, type_code, display_size, internal_size, precision, scale, null_ok, default, collation
+
+        At present, this driver doesn't support table-specific collation settings, but Django
+        requires a collation value in the FieldInfo, so None is used.
+        """
         query_format = """
             SELECT c.*
             FROM syscolumns c
@@ -27,15 +36,13 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
         """
 
         cursor.execute(query_format.format(table_name))
-        columns = [[c[0], c[3] % 256, None, c[4], c[4], None, 0 if c[3] > 256 else 1, None]
+        columns = [[c[0], c[3] % 256, None, c[4], c[4], None, 0 if c[3] > 256 else 1, None, None]
                    for c in cursor.fetchall()]
         items = []
         for column in columns:
             if column[1] in (InformixTypes.SQL_TYPE_NUMERIC.num, InformixTypes.SQL_TYPE_DECIMAL.num):
                 column[4] = int(column[3] / 256)
                 column[5] = column[3] - column[4] * 256
-            # FieldInfo:
-            #   name, type_code, display_size, internal_size, precision, scale, null_ok, default
             items.append(FieldInfo(*column))
 
         return items
