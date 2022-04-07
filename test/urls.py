@@ -1,4 +1,4 @@
-from django.conf.urls import url
+from django.urls import path
 from django.http import HttpResponse
 
 
@@ -7,5 +7,5 @@ def view(request):
 
 
 urlpatterns = [
-    url('', view),
+    path('', view),
 ]

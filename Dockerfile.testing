@@ -4,11 +4,6 @@
 ARG nonroot_uid=3973
 
 ##------------------------------------------------------------------------------
-FROM python:3.6 AS py36
-
-RUN echo "${PYTHON_VERSION}" > /tmp/py36-latest
-
-##------------------------------------------------------------------------------
 FROM python:3.7 AS py37
 
 RUN echo "${PYTHON_VERSION}" > /tmp/py37-latest
@@ -48,39 +43,6 @@ RUN yum install -y \
         unixODBC-devel
 
 RUN mkdir /src
-
-##------------------------------------------------------------------------------
-FROM builder-base AS builder-py36
-ARG py_ver=36
-ARG nonroot_uid
-COPY --from=py36 /tmp/py${py_ver}-latest /tmp/
-
-RUN mkdir /opt/py${py_ver} && chown -R ${nonroot_uid} /opt/py${py_ver} /src
-USER ${nonroot_uid}
-WORKDIR /tmp
-
-RUN export PYTHON_VERSION="$(cat /tmp/py${py_ver}-latest)" \
- && curl --silent --show-error --fail --location \
-        "https://www.python.org/ftp/python/${PYTHON_VERSION}/Python-${PYTHON_VERSION}.tgz" \
-    | tar -xz
-
-RUN export PYTHON_VERSION="$(cat /tmp/py${py_ver}-latest)" \
- && cd "/tmp/Python-${PYTHON_VERSION}" \
- && ./configure --prefix=/opt/py${py_ver} \
- && make install
-
-USER root
-ENV PATH=/opt/py${py_ver}/bin:"${PATH}"
-RUN pip3 install tox
-USER ${nonroot_uid}
-
-ENV HOME=/src
-ENV PATH=/opt/py${py_ver}/bin:"${PATH}"
-WORKDIR /src
-
-ADD django_informixdb/ /src/django_informixdb/
-ADD README.rst setup.* tox.ini /src/
-RUN tox -e "$(tox --listenvs | grep py${py_ver} | tr '\n' ',')" --notest  # prep venvs
 
 ##------------------------------------------------------------------------------
 FROM builder-base AS builder-py37
@@ -193,10 +155,6 @@ COPY --chown=${nonroot_uid} \
 FROM csdk AS multipy
 ARG nonroot_uid
 
-COPY --from=builder-py36 /opt/py36/ /opt/py36/
-COPY --from=builder-py36 /src/.tox/ /src/.tox/
-COPY --from=builder-py36 /src/.cache/ /src/.cache/
-
 COPY --from=builder-py37 /opt/py37/ /opt/py37/
 COPY --from=builder-py37 /src/.tox/ /src/.tox/
 COPY --from=builder-py37 /src/.cache/ /src/.cache/
@@ -217,7 +175,7 @@ ADD --chown=${nonroot_uid} django_informixdb/ /src/django_informixdb/
 ADD --chown=${nonroot_uid} test/ /src/test/
 RUN chown ${nonroot_uid} /src
 
-ENV PATH=/opt/py39/bin:/opt/py38/bin:/opt/py37/bin:/opt/py36/bin:"${PATH}"
+ENV PATH=/opt/py39/bin:/opt/py38/bin:/opt/py37/bin:"${PATH}"
 RUN pip3 --no-cache-dir install tox
 
 USER ${nonroot_uid}
