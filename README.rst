@@ -307,7 +307,11 @@ Requirements: Docker 19.03.2 or newer and Docker Compose 1.24.1 or newer.
 Release History
 ---------------
 
-Version 1.10.0
+Version 1.11.1
+
+- Convert from TravisCI to GitHub Actions
+
+Version 1.11.0
 
 - Begin support for Django 4.x
 - End support for Django 2.x

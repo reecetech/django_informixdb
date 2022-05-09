@@ -1,0 +1,66 @@
+---
+name: Test and Release
+
+on:
+  push:
+    branches:
+      - '**'
+    tags-ignore:
+      - '**'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Run tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          ./test-in-docker.sh
+
+  release:
+    if: ${{ github.ref == 'refs/heads/master' }}
+    needs:
+      - test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Get next version
+        uses: reecetech/version-increment@2022.2.5
+        id: version
+        with:
+          scheme: semver
+
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.10'
+
+      - name: Build package
+        shell: bash
+        run: |
+          set -euo pipefail
+          export VERSION="${{ steps.version.outputs.version }}"
+          python3 setup.py build sdist
+
+      - name: Release version on GitHub
+        uses: marvinpinto/action-automatic-releases@919008cf3f741b179569b7a6fb4d8860689ab7f0
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          draft: false
+          prerelease: false
+          automatic_release_tag: "${{ steps.version.outputs.version }}"
+
+      - name: Release version on PyPi
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_API_TOKEN }}
+          print_hash: true
+
+# vim: set sw=2:

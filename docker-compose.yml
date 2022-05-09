@@ -11,7 +11,6 @@ services:
             INFORMIXDIR: /opt/IBM/informix
             INFORMIXSQLHOSTS: /opt/IBM/informix/etc/sqlhosts
             LD_LIBRARY_PATH: /opt/IBM/informix/lib:/opt/IBM/informix/lib/cli:/opt/IBM/informix/lib/esql
-            TRAVIS: ${TRAVIS:-}
         volumes:
             - type: bind
               source: ./docker-compose.sqlhosts
