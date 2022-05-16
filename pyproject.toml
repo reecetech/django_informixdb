@@ -1,0 +1,43 @@
+[build-system]
+requires = [
+    "setuptools >= 62.2.0",
+    "wheel >= 0.37.0",
+]
+build-backend = 'setuptools.build_meta'
+
+[project]
+name = "django_informixdb"
+description = "A database driver for Django to connect to an Informix db via ODBC"
+keywords = [
+    "django",
+    "informix",
+]
+classifiers=[
+    'Development Status :: 4 - Beta',
+    'Intended Audience :: Developers',
+    'Topic :: Software Development',
+    'Topic :: Scientific/Engineering',
+    'License :: OSI Approved :: Apache Software License',
+    'Programming Language :: Python :: 3',
+    'Programming Language :: Python :: 3.7',
+    'Programming Language :: Python :: 3.8',
+    'Programming Language :: Python :: 3.9',
+    'Programming Language :: Python :: 3.10',
+]
+
+dynamic = ["version", "readme"]
+
+[[project.authors]]
+name = "Reecetech"
+email = "opensource@reecetech.com.au"
+
+[project.urls]
+Homepage = "https://github.com/reecetech/django_informixdb"
+Repository = "https://github.com/reecetech/django_informixdb"
+
+[project.license]
+text = "APLv2"
+
+[tool.setuptools.dynamic]
+version = {attr = "django_informixdb.VERSION"}
+readme = {file = "README.rst"}

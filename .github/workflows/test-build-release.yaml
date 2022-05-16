@@ -21,10 +21,7 @@ jobs:
           set -euo pipefail
           ./test-in-docker.sh
 
-  release:
-    if: ${{ github.ref == 'refs/heads/master' }}
-    needs:
-      - test
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -37,16 +34,46 @@ jobs:
           scheme: semver
 
       - name: Setup Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v3
         with:
-          python-version: '3.10'
+          python-version: '3.10'  # Should match Pipfile / "python_version"
 
       - name: Build package
         shell: bash
         run: |
           set -euo pipefail
-          export VERSION="${{ steps.version.outputs.version }}"
-          python3 setup.py build sdist
+          VERSION="${{ steps.version.outputs.version }}"
+          echo "VERSION = '${VERSION}'" > django_informixdb_vault/version.py
+          pip install "setuptools>=62.2.0"
+          python3 setup.py sdist
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: dist
+          path: dist/
+          retention-days: 3
+
+  release:
+    if: ${{ github.ref == 'refs/heads/master' }}
+    needs:
+      - test
+      - build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Get next version
+        uses: reecetech/version-increment@2022.2.5
+        id: version
+        with:
+          scheme: semver
+
+      - name: Download artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: dist  # the name of the artefact from the `build` step
+          path: dist/
 
       - name: Release version on GitHub
         uses: marvinpinto/action-automatic-releases@919008cf3f741b179569b7a6fb4d8860689ab7f0
