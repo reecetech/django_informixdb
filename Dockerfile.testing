@@ -24,34 +24,36 @@ FROM python:3.10 AS py310
 RUN echo "${PYTHON_VERSION}" > /tmp/py310-latest
 
 ##------------------------------------------------------------------------------
-FROM centos:7 AS base
+FROM rockylinux:9 AS base
 
-# EPEL needed for openssl 1.1.x
-RUN yum clean all \
- && yum update -y \
- && yum install -y \
-        epel-release \
-        nmap-ncat \
-        unixODBC \
- && yum clean all \
- && rm -rf /var/yum/cache
+RUN dnf makecache \
+ && dnf update -y \
+ && dnf install -y --allowerasing \
+        curl \
+        dnf-plugins-core \
+ && dnf config-manager --set-enabled crb \
+ && dnf install -y \
+        bzip2-devel \
+        findutils \
+        gcc \
+        gcc-c++ \
+        git \
+        libffi-devel \
+        make \
+        openssl-devel \
+        python-devel \
+        python3-pip \
+        wget \
+        xz \
+        zlib-devel \
+        sqlite-devel \
+        unixODBC-devel \
+        nc \
+ && dnf clean all
 
 ##------------------------------------------------------------------------------
 FROM base AS builder-base
 
-RUN yum install -y \
-        make \
-        yum-utils
-
-RUN yum-builddep -y python3
-
-# For pyodbc
-RUN yum install -y \
-        unixODBC-devel
-
-# Python >= 3.10 needs openssl 1.1.x
-RUN yum install -y \
-        openssl11-devel
 
 RUN mkdir /usr/local/openssl11 \
  && cd /usr/local/openssl11 \
@@ -77,8 +79,8 @@ RUN export PYTHON_VERSION="$(cat /tmp/py${py_ver}-latest)" \
 
 RUN export PYTHON_VERSION="$(cat /tmp/py${py_ver}-latest)" \
  && cd "/tmp/Python-${PYTHON_VERSION}" \
- && ./configure --prefix=/opt/py${py_ver} --with-openssl=/usr/local/openssl11 \
- && make install
+ && ./configure --prefix=/opt/py${py_ver}  --enable-optimizations \
+ && make -j 4 altinstall
 
 USER root
 ENV PATH=/opt/py${py_ver}/bin:"${PATH}"
@@ -110,8 +112,8 @@ RUN export PYTHON_VERSION="$(cat /tmp/py${py_ver}-latest)" \
 
 RUN export PYTHON_VERSION="$(cat /tmp/py${py_ver}-latest)" \
  && cd "/tmp/Python-${PYTHON_VERSION}" \
- && ./configure --prefix=/opt/py${py_ver} --with-openssl=/usr/local/openssl11 \
- && make install
+ && ./configure --prefix=/opt/py${py_ver}  --enable-optimizations \
+ && make -j 4 altinstall
 
 USER root
 ENV PATH=/opt/py${py_ver}/bin:"${PATH}"
@@ -143,8 +145,8 @@ RUN export PYTHON_VERSION="$(cat /tmp/py${py_ver}-latest)" \
 
 RUN export PYTHON_VERSION="$(cat /tmp/py${py_ver}-latest)" \
  && cd "/tmp/Python-${PYTHON_VERSION}" \
- && ./configure --prefix=/opt/py${py_ver} --with-openssl=/usr/local/openssl11 \
- && make install
+ && ./configure --prefix=/opt/py${py_ver}  --enable-optimizations \
+ && make -j 4 altinstall
 
 USER root
 ENV PATH=/opt/py${py_ver}/bin:"${PATH}"
@@ -176,8 +178,8 @@ RUN export PYTHON_VERSION="$(cat /tmp/py${py_ver}-latest)" \
 
 RUN export PYTHON_VERSION="$(cat /tmp/py${py_ver}-latest)" \
  && cd "/tmp/Python-${PYTHON_VERSION}" \
- && ./configure --prefix=/opt/py${py_ver} --with-openssl=/usr/local/openssl11 \
- && make install
+ && ./configure --prefix=/opt/py${py_ver}  --enable-optimizations \
+ && make -j 4 altinstall
 
 USER root
 ENV PATH=/opt/py${py_ver}/bin:"${PATH}"

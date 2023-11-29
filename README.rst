@@ -307,6 +307,10 @@ Requirements: Docker 19.03.2 or newer and Docker Compose 1.24.1 or newer.
 Release History
 ---------------
 
+Version 1.11.4
+
+- Update pyproject.toml / setup.cfg and update docker tests to use Rocky9 instead of Centos7
+
 Version 1.11.3
 
 - Switch from setup.py to pyproject.toml / setup.cfg

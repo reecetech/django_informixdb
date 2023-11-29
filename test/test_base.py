@@ -31,6 +31,7 @@ def db_config():
         "OPTIONS": {},
         "AUTOCOMMIT": True,
         "CONN_MAX_AGE": None,
+        "CONN_HEALTH_CHECKS": False,
         "TIME_ZONE": None,
     }
 
