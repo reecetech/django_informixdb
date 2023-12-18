@@ -25,6 +25,7 @@ from .operations import DatabaseOperations
 from .features import DatabaseFeatures
 from .schema import DatabaseSchemaEditor
 
+
 try:
     import pyodbc
 except ImportError as e:
@@ -487,6 +488,7 @@ class CursorWrapper(object):
         sql = self.format_sql(sql, params)
         params = self.format_params(params)
         self.last_params = params
+        logger.error(f"======{sql}/{params}")
         return self.cursor.execute(sql, params)
 
     def executemany(self, sql, params_list=()):
