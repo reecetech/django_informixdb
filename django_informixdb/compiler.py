@@ -3,16 +3,16 @@ from django.db.models import Value
 import django
 
 
-CONVERT_SELECT = django.VERSION >= (4, 0)
+IS_DJANGO_V4 = django.VERSION >= (4, 0)
 
 
 class SQLCompiler(compiler.SQLCompiler):
     def get_select(self, with_col_aliases=False):
-        ret, klass_info, annotations = super().get_select(with_col_aliases)
-        if CONVERT_SELECT:
+        if IS_DJANGO_V4:
+            ret, klass_info, annotations = super().get_select(with_col_aliases)
             return [self.convert_select(node, sql, params) for node, sql, params in ret], klass_info, annotations
         else:
-            return ret, klass_info, annotations
+            return super().get_select()
 
     def convert_select(self, node, sql, params):
         # Informix does not handle field injection in SELECT statement
