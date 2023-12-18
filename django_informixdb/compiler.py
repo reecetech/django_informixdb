@@ -1,7 +1,25 @@
 from django.db.models.sql import compiler
+from django.db.models import Value
+import django
+
+
+IS_DJANGO_V4 = django.VERSION >= (4, 0)
 
 
 class SQLCompiler(compiler.SQLCompiler):
+    def get_select(self, with_col_aliases=False):
+        if IS_DJANGO_V4:
+            ret, klass_info, annotations = super().get_select(with_col_aliases)
+            return [self.convert_select(node, sql, params) for node, sql, params in ret], klass_info, annotations
+        else:
+            return super().get_select()
+
+    def convert_select(self, node, sql, params):
+        # Informix does not handle field injection in SELECT statement
+        if type(node) is Value and next(iter(sql), None) == '%s':
+            sql = node.value, []
+        return node, sql, params
+
     def as_sql(self, with_limits=True, with_col_aliases=False):
         raw_sql, fields = super(SQLCompiler, self).as_sql(False, with_col_aliases)
 
