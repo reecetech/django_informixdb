@@ -1,11 +1,18 @@
 from django.db.models.sql import compiler
 from django.db.models import Value
+import django
+
+
+CONVERT_SELECT = django.VERSION >= 4
 
 
 class SQLCompiler(compiler.SQLCompiler):
     def get_select(self, with_col_aliases=False):
         ret, klass_info, annotations = super().get_select(with_col_aliases)
-        return [self.convert_select(node, sql, params) for node, sql, params in ret], klass_info, annotations
+        if CONVERT_SELECT:
+            return [self.convert_select(node, sql, params) for node, sql, params in ret], klass_info, annotations
+        else:
+            return ret, klass_info, annotations
 
     def convert_select(self, node, sql, params):
         # Informix does not handle field injection in SELECT statement
