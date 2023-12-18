@@ -3,7 +3,7 @@ from django.db.models import Value
 import django
 
 
-CONVERT_SELECT = django.VERSION >= 4
+CONVERT_SELECT = django.VERSION >= (4, 0)
 
 
 class SQLCompiler(compiler.SQLCompiler):
