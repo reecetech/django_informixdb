@@ -21,7 +21,7 @@ class SQLCompiler(compiler.SQLCompiler):
         return node, sql, params
 
     def as_sql(self, with_limits=True, with_col_aliases=False):
-        # fix informix count function and Case When
+        # Cast Informix COUNT() to int
         select = self.query.annotation_select
         for agg in select.values():
             if getattr(agg, 'function', '') == 'COUNT':
