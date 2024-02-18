@@ -13,3 +13,7 @@ class CompilerCase(TestCase):
     def test_exists_returns_False_if_not_exists(self):
         exists = Donut.objects.filter(name="test").exists()
         self.assertFalse(exists)
+
+    def test_int_count(self):
+        count = Donut.objects.count()
+        self.assertIsInstance(count, int)
