@@ -21,6 +21,12 @@ class SQLCompiler(compiler.SQLCompiler):
         return node, sql, params
 
     def as_sql(self, with_limits=True, with_col_aliases=False):
+        # Cast Informix COUNT() to int
+        select = self.query.annotation_select
+        for agg in select.values():
+            if getattr(agg, 'function', '') == 'COUNT':
+                agg.template = '%s::int' % agg.template
+                
         raw_sql, fields = super(SQLCompiler, self).as_sql(False, with_col_aliases)
 
         # special dialect to return first n rows
