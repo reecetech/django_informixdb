@@ -70,7 +70,7 @@ jobs:
           scheme: semver
 
       - name: Download artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4.1.7
         with:
           name: dist  # the name of the artefact from the `build` step
           path: dist/
