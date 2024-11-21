@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Run tests
         shell: bash
@@ -27,7 +27,7 @@ jobs:
       version: "${{ steps.version.outputs.version }}"
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Get next version
         uses: reecetech/version-increment@2024.10.1
@@ -37,7 +37,7 @@ jobs:
           pep440: true
 
       - name: Setup Python
-        uses: actions/setup-python@v3
+        uses: actions/setup-python@v5
         with:
           python-version: '3.10'  # Should match Pipfile / "python_version"
 
@@ -50,11 +50,12 @@ jobs:
           pip install "setuptools>=62.2.0"
           python3 setup.py sdist
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: dist
           path: dist/
           retention-days: 3
+          include-hidden-files: true
 
   release:
     if: ${{ github.ref_name == github.event.repository.default_branch }}
@@ -64,7 +65,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Download artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: dist  # the name of the artefact from the `build` step
           path: dist/
