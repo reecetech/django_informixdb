@@ -54,7 +54,7 @@ jobs:
           retention-days: 3
 
   release:
-    if: ${{ github.ref == 'refs/heads/master' }}
+    if: ${{ github.ref_name == github.event.repository.default_branch }}
     needs:
       - test
       - build
