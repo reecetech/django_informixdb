@@ -23,15 +23,18 @@ jobs:
 
   build:
     runs-on: ubuntu-latest
+    outputs:
+      version: "${{ steps.version.outputs.version }}"
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
       - name: Get next version
-        uses: reecetech/version-increment@2022.2.5
+        uses: reecetech/version-increment@2024.10.1
         id: version
         with:
           scheme: semver
+          pep440: true
 
       - name: Setup Python
         uses: actions/setup-python@v3
@@ -60,15 +63,6 @@ jobs:
       - build
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Get next version
-        uses: reecetech/version-increment@2022.2.5
-        id: version
-        with:
-          scheme: semver
-
       - name: Download artifact
         uses: actions/download-artifact@v3
         with:
@@ -81,7 +75,7 @@ jobs:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           draft: false
           prerelease: false
-          automatic_release_tag: "${{ steps.version.outputs.version }}"
+          automatic_release_tag: "${{ needs.build.outputs.version }}"
 
       - name: Release version on PyPi
         uses: pypa/gh-action-pypi-publish@release/v1
