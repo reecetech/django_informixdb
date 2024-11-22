@@ -307,6 +307,16 @@ Requirements: Docker 19.03.2 or newer and Docker Compose 1.24.1 or newer.
 Release History
 ---------------
 
+Version 1.12.2
+
+- Update to latest GitHub actions
+
+Version 1.12.1
+
+- End support for Python 3.7
+- End support for Python 3.8
+- Rework to newer Docker Compose for testing
+
 Version 1.11.4
 
 - Update pyproject.toml / setup.cfg and update docker tests to use Rocky9 instead of Centos7
