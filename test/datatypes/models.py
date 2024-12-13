@@ -1,6 +1,6 @@
 from django.db import models
 
-from django_informixdb.fields import CharToBooleanField, TrimCharField
+from django_informixdb_dev.fields import CharToBooleanField, TrimCharField
 
 
 class Donut(models.Model):

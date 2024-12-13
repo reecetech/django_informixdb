@@ -13,7 +13,7 @@ def pytest_configure():
         ),
         DATABASES={
             "default": {
-                "ENGINE": "django_informixdb",
+                "ENGINE": "django_informixdb_dev",
                 "SERVER": "informix",
                 "NAME": "adapter",
                 "USER": "informix",

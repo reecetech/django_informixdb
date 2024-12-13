@@ -86,7 +86,7 @@ ENV HOME=/src
 ENV PATH=/opt/py${py_ver}/bin:"${PATH}"
 WORKDIR /src
 
-ADD django_informixdb/ /src/django_informixdb/
+ADD django_informixdb_dev/ /src/django_informixdb_dev/
 ADD README.rst setup.* tox.ini /src/
 RUN tox -e "$(tox --listenvs | grep py${py_ver} | tr '\n' ',')" --notest  # prep venvs
 
@@ -119,7 +119,7 @@ ENV HOME=/src
 ENV PATH=/opt/py${py_ver}/bin:"${PATH}"
 WORKDIR /src
 
-ADD django_informixdb/ /src/django_informixdb/
+ADD django_informixdb_dev/ /src/django_informixdb_dev/
 ADD README.rst setup.* tox.ini /src/
 RUN tox -e "$(tox --listenvs | grep py${py_ver} | tr '\n' ',')" --notest  # prep venvs
 
@@ -152,7 +152,7 @@ ENV HOME=/src
 ENV PATH=/opt/py${py_ver}/bin:"${PATH}"
 WORKDIR /src
 
-ADD django_informixdb/ /src/django_informixdb/
+ADD django_informixdb_dev/ /src/django_informixdb_dev/
 ADD README.rst setup.* tox.ini /src/
 RUN tox -e "$(tox --listenvs | grep py${py_ver} | tr '\n' ',')" --notest  # prep venvs
 
@@ -184,7 +184,7 @@ ADD wait-for-deps.sh /usr/local/bin
 RUN chmod a+rx /usr/local/bin/wait-for-deps.sh
 
 ADD --chown=${nonroot_uid} README.rst setup.* tox.ini /src/
-ADD --chown=${nonroot_uid} django_informixdb/ /src/django_informixdb/
+ADD --chown=${nonroot_uid} django_informixdb_dev/ /src/django_informixdb_dev/
 ADD --chown=${nonroot_uid} test/ /src/test/
 RUN chown ${nonroot_uid} /src
 

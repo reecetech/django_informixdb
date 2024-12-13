@@ -5,7 +5,7 @@ import pyodbc
 import pytest
 from freezegun import freeze_time
 
-from django_informixdb.base import DatabaseWrapper
+from django_informixdb_dev.base import DatabaseWrapper
 
 
 CONNECTION_FAILED_ERROR = pyodbc.Error(
@@ -23,7 +23,7 @@ AUTHENTICATION_ERROR = pyodbc.Error(
 @pytest.fixture
 def db_config():
     return {
-        "ENGINE": "django_informixdb",
+        "ENGINE": "django_informixdb_dev",
         "SERVER": "informix",
         "NAME": "sysmaster",
         "USER": "informix",

@@ -57,7 +57,7 @@ Django’s settings.py uses the following to connect to an Informix database:
 .. code-block:: python
 
     'default': {
-        'ENGINE': 'django_informixdb',
+        'ENGINE': 'django_informixdb_dev',
         'NAME': 'myproject',
         'SERVER': 'ifxserver',
         'USER' : 'testuser',
@@ -145,7 +145,7 @@ CONNECTION_RETRY
 
         DATABASES = {
            'default': {
-               'ENGINE': 'django_informixdb',
+               'ENGINE': 'django_informixdb_dev',
                'CONNECTION_RETRY': {
                    'MAX_ATTEMPTS': 10,
                    'WAIT_MIN': 0,
@@ -281,10 +281,10 @@ You can follow the steps above, in the section on using Informix locally with Do
     ./manage.py test -k
 
 
-For django_informixdb Developers
---------------------------------
+For django_informixdb_dev Developers
+------------------------------------
 
-To run the django_informixdb test suite, you need to set the INFORMIXDIR environment variable, and the tests
+To run the django_informixdb_dev test suite, you need to set the INFORMIXDIR environment variable, and the tests
 expect an Informix database at host "informix". Change that host in `test/conftest.py` if you need to.
 Then run the test suite with:
 
@@ -331,7 +331,7 @@ Version 1.11.0
 
 Version 1.10.1
 
-- Fix for https://github.com/reecetech/django_informixdb/issues/31
+- Fix for https://github.com/reecetech/django_informixdb_dev/issues/31
 
 Version 1.10.0
 
