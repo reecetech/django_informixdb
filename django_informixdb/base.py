@@ -245,6 +245,14 @@ class DatabaseWrapper(BaseDatabaseWrapper):
             parts.append('Pwd={}'.format(conn_params['PASSWORD']))
         if 'CPTIMEOUT' in conn_params['OPTIONS']:
             parts.append('CPTimeout={}'.format(conn_params['OPTIONS']['CPTIMEOUT']))
+        if 'POOLING' in conn_params['OPTIONS']:
+            parts.append('Pooling={}'.format(conn_params['OPTIONS']['POOLING']))
+        if 'CPMATCH' in conn_params['OPTIONS']:
+            parts.append('CPMatch={}'.format(conn_params['OPTIONS']['CPMATCH']))
+        if 'MINPOOLSIZE' in conn_params['OPTIONS']:
+            parts.append('MinPoolSize={}'.format(conn_params['OPTIONS']['MINPOOLSIZE']))
+        if 'MAXCONNLIMIT' in conn_params['OPTIONS']:
+            parts.append('MaxConnLimit={}'.format(conn_params['OPTIONS']['MAXCONNLIMIT']))
 
         connection_string = ';'.join(parts)
         logging.debug('Connecting to Informix')
