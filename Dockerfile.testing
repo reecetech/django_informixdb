@@ -45,7 +45,6 @@ RUN dnf makecache \
         sqlite-devel \
         unixODBC-devel \
         nc \
-        vim \
  && dnf clean all
 
 ##------------------------------------------------------------------------------

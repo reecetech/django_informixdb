@@ -308,7 +308,6 @@ Release History
 ---------------
 Version 1.13.0
 
-- Add support for Python 3.10
 - Add support for Python 3.11
 - Update to latest GitHub actions
 
