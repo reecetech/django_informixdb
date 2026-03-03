@@ -26,8 +26,8 @@ jobs:
     outputs:
       version: "${{ steps.version.outputs.version }}"
     steps:
-      - name: Checkout cod6
-        uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v6
 
       - name: Get next version
         uses: reecetech/version-increment@2024.10.1

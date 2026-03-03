@@ -48,11 +48,6 @@ RUN dnf makecache \
         vim \
  && dnf clean all
 
- RUN dnf groupinstall "Development Tools" -y \
-  && dnf install  bzip2 readline-devel xz xz-devel tk-devel -y \
-       gdbm-devel libuuid-devel libnsl2-devel -y \
-  && yum install sqlite-devel -y
-
 ##------------------------------------------------------------------------------
 FROM base AS builder-base
 
