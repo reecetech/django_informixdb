@@ -35,6 +35,7 @@ jobs:
         with:
           scheme: semver
           pep440: true
+          increment: minor
 
       - name: Setup Python
         uses: actions/setup-python@v5

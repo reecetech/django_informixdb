@@ -306,7 +306,7 @@ Requirements: Docker 19.03.2 or newer and Docker Compose 1.24.1 or newer.
 
 Release History
 ---------------
-Version 1.12.3
+Version 1.13.0
 
 - Add support for Python 3.10
 - Add support for Python 3.11
