@@ -47,7 +47,6 @@ RUN dnf makecache \
         nc \
         vim \
  && dnf clean all
- && dnf -y groupinstall "Development Tools"
 
  RUN dnf groupinstall "Development Tools" -y \
   && dnf install  bzip2 readline-devel xz xz-devel tk-devel -y \
