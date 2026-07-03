@@ -187,6 +187,8 @@ RUN chmod a+rx /usr/local/bin/wait-for-deps.sh
 ADD --chown=${nonroot_uid} README.rst setup.* tox.ini /src/
 ADD --chown=${nonroot_uid} django_informixdb/ /src/django_informixdb/
 ADD --chown=${nonroot_uid} test/ /src/test/
+ADD --chown=${nonroot_uid} odbc.ini /src/.odbc.ini
+
 RUN chown ${nonroot_uid} /src
 
 ENV PATH=/opt/py311/bin:/opt/py310/bin:/opt/py39/bin:"${PATH}"
